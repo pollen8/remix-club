@@ -53,7 +53,7 @@ export default function ClubsIndexRoute() {
 					{data.clubs.map(club => (
 						<li key={club.id}>
 							<Link
-								to={club.name}
+								to={club.id}
 								className="flex h-36 w-44 flex-col items-center justify-center rounded-lg bg-muted px-5 py-3"
 							>
 								<span className="w-full overflow-hidden text-ellipsis text-center text-body-sm text-muted-foreground">
