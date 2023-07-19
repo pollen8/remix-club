@@ -104,7 +104,7 @@ export default function ClubRoute() {
 
 	return (
 		<>
-			<div className="absolute inset-0 flex flex-col px-10">
+			<div className=" inset-0 flex flex-col px-10">
 				<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.club.name}</h2>
 				<div className={`${data.isOwner ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
 					<p className="whitespace-break-spaces text-sm md:text-lg">
@@ -163,7 +163,7 @@ export function DeleteClub({ id }: { id: string }) {
 			<StatusButton
 				type="submit"
 				name="intent"
-				value="delete-note"
+				value="delete-club"
 				variant="destructive"
 				status={
 					navigation.state === 'submitting' &&
