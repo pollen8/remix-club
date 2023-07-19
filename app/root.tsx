@@ -1,53 +1,77 @@
-import { cssBundleHref } from '@remix-run/css-bundle'
+import { useRef } from 'react';
+
+import { cssBundleHref } from '@remix-run/css-bundle';
 import {
-	json,
-	type DataFunctionArgs,
-	type HeadersFunction,
-	type LinksFunction,
-	type V2_MetaFunction,
-} from '@remix-run/node'
+  DataFunctionArgs,
+  HeadersFunction,
+  json,
+  LinksFunction,
+  V2_MetaFunction,
+} from '@remix-run/node';
 import {
-	Form,
-	Link,
-	Links,
-	LiveReload,
-	Meta,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
-	useLoaderData,
-	useMatches,
-	useSubmit,
-} from '@remix-run/react'
-import { withSentry } from '@sentry/remix'
-import { useRef } from 'react'
-import { Confetti } from './components/confetti.tsx'
-import { GeneralErrorBoundary } from './components/error-boundary.tsx'
-import { SearchBar } from './components/search-bar.tsx'
-import { Button } from './components/ui/button.tsx'
+  Form,
+  Link,
+  Links,
+  LiveReload,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLoaderData,
+  useMatches,
+  useSubmit,
+} from '@remix-run/react';
+import { withSentry } from '@sentry/remix';
+
+import { Confetti } from './components/confetti.tsx';
+import { GeneralErrorBoundary } from './components/error-boundary.tsx';
+import { SearchBar } from './components/search-bar.tsx';
+import { Button } from './components/ui/button.tsx';
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuPortal,
-	DropdownMenuTrigger,
-} from './components/ui/dropdown-menu.tsx'
-import { Icon, href as iconsHref } from './components/ui/icon.tsx'
-import { Toaster } from './components/ui/toaster.tsx'
-import { ThemeSwitch, useTheme } from './routes/resources+/theme/index.tsx'
-import { getTheme } from './routes/resources+/theme/theme.server.ts'
-import fontStylestylesheetUrl from './styles/font.css'
-import tailwindStylesheetUrl from './styles/tailwind.css'
-import { authenticator, getUserId } from './utils/auth.server.ts'
-import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
-import { prisma } from './utils/db.server.ts'
-import { getEnv } from './utils/env.server.ts'
-import { getFlashSession } from './utils/flash-session.server.ts'
-import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.ts'
-import { useNonce } from './utils/nonce-provider.ts'
-import { makeTimings, time } from './utils/timing.server.ts'
-import { useToast } from './utils/useToast.tsx'
-import { useOptionalUser, useUser } from './utils/user.ts'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+} from './components/ui/dropdown-menu.tsx';
+import {
+  href as iconsHref,
+  Icon,
+} from './components/ui/icon.tsx';
+import { Toaster } from './components/ui/toaster.tsx';
+import {
+  ThemeSwitch,
+  useTheme,
+} from './routes/resources+/theme/index.tsx';
+import { getTheme } from './routes/resources+/theme/theme.server.ts';
+import fontStylestylesheetUrl from './styles/font.css';
+import tailwindStylesheetUrl from './styles/tailwind.css';
+import {
+  authenticator,
+  getUserId,
+} from './utils/auth.server.ts';
+import {
+  ClientHintCheck,
+  getHints,
+} from './utils/client-hints.tsx';
+import { prisma } from './utils/db.server.ts';
+import { getEnv } from './utils/env.server.ts';
+import { getFlashSession } from './utils/flash-session.server.ts';
+import {
+  combineHeaders,
+  getDomainUrl,
+  getUserImgSrc,
+} from './utils/misc.ts';
+import { useNonce } from './utils/nonce-provider.ts';
+import {
+  makeTimings,
+  time,
+} from './utils/timing.server.ts';
+import {
+  useOptionalUser,
+  useUser,
+} from './utils/user.ts';
+import { useToast } from './utils/useToast.tsx';
 
 export const links: LinksFunction = () => {
 	return [
@@ -267,6 +291,13 @@ function UserDropdown() {
 						<Link prefetch="intent" to={`/users/${user.username}/notes`}>
 							<Icon className="text-body-md" name="pencil-2">
 								Notes
+							</Icon>
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link prefetch="intent" to={`/clubs`}>
+							<Icon className="text-body-md" name="pencil-2">
+								Clubs
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
