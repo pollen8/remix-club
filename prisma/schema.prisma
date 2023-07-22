@@ -66,9 +66,6 @@ model User {
   notes        Note[]
   roles        Role[]
   session      Session[]
-  clubs        UserClubs[]
-  attendance   UserAttendance[]
-  matches      PlayerMatches[]
   createdClubs Club[]           @relation(name: "CreatedClubs")
 }
 
@@ -138,20 +135,32 @@ model Club {
   createdById String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  users       UserClubs[]
+  users       Member[]
   seasons     Season[]
-  attandance  UserAttendance[]
+  attandance  MemberAttendance[]
   teams       Team[]
 }
 
-model UserClubs {
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-  club   Club   @relation(fields: [clubId], references: [id])
-  clubId String
 
-  @@id([userId, clubId])
+model Member {
+  id String @id @unique @default(cuid())
+  name String
+  email String
+  mobile String
+  clubs        Club[]
+  attendance   MemberAttendance[]
+  matches      PlayerMatches[]
 }
+
+
+// model MemberClubs {
+//   member   Member   @relation(fields: [memberId], references: [id])
+//   memberId String
+//   club   Club   @relation(fields: [clubId], references: [id])
+//   clubId String
+
+//   @@id([memberId, clubId])
+// }
 
 model Season {
   id         String           @id @unique @default(cuid())
@@ -160,13 +169,13 @@ model Season {
   end        DateTime
   club       Club             @relation(fields: [clubId], references: [id])
   clubId     String
-  attendance UserAttendance[]
+  attendance MemberAttendance[]
   teams      Team[]
 }
 
-model UserAttendance {
-  user           User     @relation(fields: [userId], references: [id])
-  userId         String
+model MemberAttendance {
+  member         Member     @relation(fields: [memberId], references: [id])
+  memberId         String
   club           Club     @relation(fields: [clubId], references: [id])
   clubId         String
   season         Season   @relation(fields: [seasonId], references: [id])
@@ -175,7 +184,7 @@ model UserAttendance {
   /// Member Paid Guest or Unpaid Guest
   type           String
 
-  @@id([userId, clubId, seasonId])
+  @@id([memberId, clubId, seasonId])
 }
 
 model Team {
@@ -200,7 +209,7 @@ model Match {
 }
 
 model PlayerMatches {
-  player   User   @relation(fields: [playerId], references: [id])
+  player   Member   @relation(fields: [playerId], references: [id])
   playerId String
   match    Match  @relation(fields: [matchId], references: [id])
   matchId  String

@@ -4,6 +4,7 @@ import { json, type DataFunctionArgs } from '@remix-run/node'
 import {
 	Form,
 	Link,
+	NavLink,
 	useActionData,
 	useFormAction,
 	useLoaderData,
@@ -58,7 +59,7 @@ const DeleteFormSchema = z.object({
 export async function action({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
-	console.log(formData)
+
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
 		acceptMultipleErrors: () => true,
@@ -112,6 +113,9 @@ export default function ClubRoute() {
 					</p>
 				</div>
 			</div>
+			<NavLink to="members">
+				<Icon name="plus">Members</Icon>
+			</NavLink>
 			{data.isOwner ? (
 				<div className={floatingToolbarClassName}>
 					<span
@@ -155,8 +159,6 @@ export function DeleteClub({ id }: { id: string }) {
 			return parse(formData, { schema: DeleteFormSchema })
 		},
 	})
-	console.log(getFieldsetConstraint(DeleteFormSchema))
-	console.log('id', id, formAction)
 	return (
 		<Form method="post" {...form.props}>
 			<input type="hidden" name="clubId" value={id} />
