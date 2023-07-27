@@ -10,22 +10,24 @@ import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
+import { addYears } from 'date-fns'
 
-export const MemberEditorSchema = z.object({
+export const SeasonEditorSchema = z.object({
 	id: z.string().optional(),
 	clubId: z.string(),
 	name: z.string().min(1),
-	email: z.string().email(),
-	mobile: z.string().optional(),
+	start: z.string().pipe(z.coerce.date()),
+	end: z.string().pipe(z.coerce.date()),
 })
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
-		schema: MemberEditorSchema,
+		schema: SeasonEditorSchema,
 		acceptMultipleErrors: () => true,
 	})
+
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
 	}
@@ -38,30 +40,26 @@ export async function action({ request, params }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	let member
+	let season
 
-	const { name, email, mobile, id, clubId } = submission.value
+	const { name, start, end, id, clubId } = submission.value
 
 	const data = {
 		name,
-		email: email,
-		mobile: mobile ?? '',
-		clubs: {
-			connect: {
-				id: clubId,
-			},
-		},
+		start: start ?? new Date(),
+		end: end ?? addYears(new Date(), 1),
+		clubId: clubId,
 	}
 
 	const select = {
 		id: true,
 	}
 	if (id) {
-		const existingMember = await prisma.member.findFirst({
+		const existingSeason = await prisma.season.findFirst({
 			where: { id },
 			select: { id: true },
 		})
-		if (!existingMember) {
+		if (!existingSeason) {
 			return json(
 				{
 					status: 'error',
@@ -70,53 +68,52 @@ export async function action({ request, params }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		member = await prisma.member.update({
+		season = await prisma.season.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		member = await prisma.member.create({ data, select })
+		season = await prisma.season.create({ data, select })
 	}
-	return redirectWithToast(`/clubs/${clubId}/members`, {
-		title: id ? 'Member updated' : 'Member created',
+	return redirectWithToast(`/clubs/${clubId}/seasons`, {
+		title: id ? 'Season updated' : 'Season created',
 	})
 }
 
-export function MemberEditor({
+export function SeasonEditor({
 	clubId,
-	member,
+	season,
 }: {
 	clubId: string
-	member?: { id: string; name: string; email: string; mobile: string }
+	season?: { id: string; name: string; start: string; end: string }
 }) {
-	const memberEditorFetcher = useFetcher<typeof action>()
-
+	const seasonEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
-		id: 'member-editor',
-		constraint: getFieldsetConstraint(MemberEditorSchema),
-		lastSubmission: memberEditorFetcher.data?.submission,
+		id: 'season-editor',
+		constraint: getFieldsetConstraint(SeasonEditorSchema),
+		lastSubmission: seasonEditorFetcher.data?.submission,
 		onValidate({ formData }) {
-			return parse(formData, { schema: MemberEditorSchema })
+			return parse(formData, { schema: SeasonEditorSchema })
 		},
 		defaultValue: {
-			name: member?.name,
-			email: member?.email,
-			mobile: member?.mobile,
+			name: season?.name,
+			start: season?.start,
+			end: season?.end,
 		},
 		shouldRevalidate: 'onBlur',
 	})
 
 	return (
-		<memberEditorFetcher.Form
+		<seasonEditorFetcher.Form
 			method="post"
-			action="/resources/member-editor"
+			action="/resources/season-editor"
 			className="flex h-full flex-col gap-y-4 overflow-x-hidden px-10 pb-28 pt-12"
 			{...form.props}
 		>
 			<input name="clubId" type="hidden" value={clubId} />
-			<input name="id" type="hidden" value={member?.id} />
-			Edit Member....
+			<input name="id" type="hidden" value={season?.id} />
+			{season?.id ? 'Edit Season....' : 'Add Season'}
 			<Field
 				labelProps={{ children: 'Name' }}
 				inputProps={{
@@ -127,17 +124,19 @@ export function MemberEditor({
 				className="flex flex-col gap-y-2"
 			/>
 			<Field
-				labelProps={{ children: 'Email' }}
+				labelProps={{ children: 'Start date' }}
 				inputProps={{
-					...conform.input(fields.email),
+					type: 'date',
+					...conform.input(fields.start),
 				}}
 				errors={fields.name.errors}
 				className="flex flex-col gap-y-2"
 			/>
 			<Field
-				labelProps={{ children: 'Mobile' }}
+				labelProps={{ children: 'End date' }}
 				inputProps={{
-					...conform.input(fields.mobile),
+					type: 'date',
+					...conform.input(fields.end),
 				}}
 				errors={fields.name.errors}
 				className="flex flex-col gap-y-2"
@@ -154,12 +153,12 @@ export function MemberEditor({
 				</Button>
 				<StatusButton
 					status={
-						memberEditorFetcher.state === 'submitting'
+						seasonEditorFetcher.state === 'submitting'
 							? 'pending'
-							: memberEditorFetcher.data?.status ?? 'idle'
+							: seasonEditorFetcher.data?.status ?? 'idle'
 					}
 					type="submit"
-					disabled={memberEditorFetcher.state !== 'idle'}
+					disabled={seasonEditorFetcher.state !== 'idle'}
 					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 				>
 					<Icon
@@ -169,6 +168,6 @@ export function MemberEditor({
 					<span className="max-md:hidden">Submit</span>
 				</StatusButton>
 			</div>
-		</memberEditorFetcher.Form>
+		</seasonEditorFetcher.Form>
 	)
 }

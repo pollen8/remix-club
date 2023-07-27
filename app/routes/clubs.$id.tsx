@@ -114,7 +114,10 @@ export default function ClubRoute() {
 				</div>
 			</div>
 			<NavLink to="members">
-				<Icon name="plus">Members</Icon>
+				<Icon name="person">Members</Icon>
+			</NavLink>
+			<NavLink to="seasons">
+				<Icon name="calendar-month">Seasons</Icon>
 			</NavLink>
 			{data.isOwner ? (
 				<div className={floatingToolbarClassName}>

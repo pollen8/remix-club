@@ -14,26 +14,19 @@ import { parse } from '@conform-to/zod'
 import { DeleteButton } from '~/components/ui/deleteButton.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
-	const timings = makeTimings('club members loader')
+	const timings = makeTimings('club seasons loader')
 
-	const members = await time(
+	const seasons = await time(
 		() =>
-			prisma.member.findMany({
-				include: {
-					clubs: true,
-				},
+			prisma.season.findMany({
 				where: {
-					clubs: {
-						some: {
-							id: params.id,
-						},
-					},
+					clubId: params.id,
 				},
 			}),
-		{ timings, type: 'find club members' },
+		{ timings, type: 'find club seasons' },
 	)
 	return json(
-		{ members, clubId: params.id },
+		{ seasons, clubId: params.id },
 		{ headers: { 'Server-Timing': timings.toString() } },
 	)
 }
@@ -44,14 +37,14 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 	}
 }
 
-export default function ClubsMembersIndexRoute() {
+export default function ClubsSeasonsIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
 		<div className="container pt-12">
 			<div className="container mb-48 mt-36 flex flex-col items-center justify-center gap-6">
-				<h1 className="text-h1">Members</h1>
+				<h1 className="text-h1">Seasons</h1>
 				<NavLink to="new">
-					<Icon name="plus">New Member</Icon>
+					<Icon name="plus">New Season</Icon>
 				</NavLink>
 				<table>
 					<thead>
@@ -62,17 +55,17 @@ export default function ClubsMembersIndexRoute() {
 						</tr>
 					</thead>
 					<tbody>
-						{data.members.map(member => (
-							<tr key={member.id}>
-								<td>{member.name}</td>
-								<td>{member.id}</td>
+						{data.seasons.map(season => (
+							<tr key={season.id}>
+								<td>{season.name}</td>
+								<td>{season.id}</td>
 								<td>
 									<DeleteButton
-										id={member.id}
-										clubId={data.clubId ?? ''}
-										action={action}
 										schema={DeleteFormSchema}
-										intent="delete-member"
+										intent="delete-season"
+										action={action}
+										id={season.id}
+										clubId={data.clubId ?? ''}
 									/>
 								</td>
 							</tr>
@@ -86,7 +79,7 @@ export default function ClubsMembersIndexRoute() {
 }
 
 const DeleteFormSchema = z.object({
-	intent: z.literal('delete-member'),
+	intent: z.literal('delete-season'),
 	id: z.string(),
 	clubId: z.string(),
 })
@@ -111,26 +104,26 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 	const { clubId, id } = submission.value
 
-	const member = await prisma.member.findFirst({
+	const season = await prisma.season.findFirst({
 		select: { id: true },
 		where: {
 			id: id,
 		},
 	})
 
-	if (!member) {
-		submission.error.id = ['Member not found']
+	if (!season) {
+		submission.error.id = ['Season not found']
 		return json({ status: 'error', submission } as const, {
 			status: 404,
 		})
 	}
 
-	await prisma.member.delete({
-		where: { id: member.id },
+	await prisma.season.delete({
+		where: { id: season.id },
 	})
 
-	return redirectWithToast(`/clubs/${clubId}/members`, {
-		title: 'Member removed',
+	return redirectWithToast(`/clubs/${clubId}/seasons`, {
+		title: 'Season removed',
 		variant: 'destructive',
 	})
 }

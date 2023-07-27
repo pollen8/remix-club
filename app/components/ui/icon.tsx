@@ -83,3 +83,5 @@ export type IconName =
 	| 'reset'
 	| 'sun'
 	| 'trash'
+	| 'person'
+	| 'calendar-month'

@@ -2,7 +2,7 @@ import { requireUserId } from '~/utils/auth.server.ts'
 
 import { json } from '@remix-run/router'
 import { DataFunctionArgs } from '@remix-run/server-runtime'
-import { MemberEditor } from './resources+/member-editor.tsx'
+import { SeasonEditor } from './resources+/season-editor.tsx'
 import { useLoaderData } from '@remix-run/react'
 
 export async function loader({ request, params }: DataFunctionArgs) {
@@ -10,7 +10,7 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	return json({ id: params.id })
 }
 
-export default function NewMemberRoute() {
+export default function NewSeasonRoute() {
 	const data = useLoaderData<typeof loader>()
-	return <MemberEditor clubId={data.id} />
+	return <SeasonEditor clubId={data.id} />
 }
