@@ -1,77 +1,55 @@
-import { useRef } from 'react';
+import { useRef } from 'react'
 
-import { cssBundleHref } from '@remix-run/css-bundle';
+import { cssBundleHref } from '@remix-run/css-bundle'
 import {
-  DataFunctionArgs,
-  HeadersFunction,
-  json,
-  LinksFunction,
-  V2_MetaFunction,
-} from '@remix-run/node';
+	DataFunctionArgs,
+	HeadersFunction,
+	json,
+	LinksFunction,
+	V2_MetaFunction,
+} from '@remix-run/node'
 import {
-  Form,
-  Link,
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useLoaderData,
-  useMatches,
-  useSubmit,
-} from '@remix-run/react';
-import { withSentry } from '@sentry/remix';
+	Form,
+	Link,
+	Links,
+	LiveReload,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useLoaderData,
+	useMatches,
+	useSubmit,
+} from '@remix-run/react'
+import { withSentry } from '@sentry/remix'
 
-import { Confetti } from './components/confetti.tsx';
-import { GeneralErrorBoundary } from './components/error-boundary.tsx';
-import { SearchBar } from './components/search-bar.tsx';
-import { Button } from './components/ui/button.tsx';
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import { SearchBar } from './components/search-bar.tsx'
+import { Button } from './components/ui/button.tsx'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
-} from './components/ui/dropdown-menu.tsx';
-import {
-  href as iconsHref,
-  Icon,
-} from './components/ui/icon.tsx';
-import { Toaster } from './components/ui/toaster.tsx';
-import {
-  ThemeSwitch,
-  useTheme,
-} from './routes/resources+/theme/index.tsx';
-import { getTheme } from './routes/resources+/theme/theme.server.ts';
-import fontStylestylesheetUrl from './styles/font.css';
-import tailwindStylesheetUrl from './styles/tailwind.css';
-import {
-  authenticator,
-  getUserId,
-} from './utils/auth.server.ts';
-import {
-  ClientHintCheck,
-  getHints,
-} from './utils/client-hints.tsx';
-import { prisma } from './utils/db.server.ts';
-import { getEnv } from './utils/env.server.ts';
-import { getFlashSession } from './utils/flash-session.server.ts';
-import {
-  combineHeaders,
-  getDomainUrl,
-  getUserImgSrc,
-} from './utils/misc.ts';
-import { useNonce } from './utils/nonce-provider.ts';
-import {
-  makeTimings,
-  time,
-} from './utils/timing.server.ts';
-import {
-  useOptionalUser,
-  useUser,
-} from './utils/user.ts';
-import { useToast } from './utils/useToast.tsx';
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuPortal,
+	DropdownMenuTrigger,
+} from './components/ui/dropdown-menu.tsx'
+import { href as iconsHref, Icon } from './components/ui/icon.tsx'
+import { Toaster } from './components/ui/toaster.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme/index.tsx'
+import { getTheme } from './routes/resources+/theme/theme.server.ts'
+import fontStylestylesheetUrl from './styles/font.css'
+import tailwindStylesheetUrl from './styles/tailwind.css'
+import { authenticator, getUserId } from './utils/auth.server.ts'
+import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
+import { prisma } from './utils/db.server.ts'
+import { getEnv } from './utils/env.server.ts'
+import { getFlashSession } from './utils/flash-session.server.ts'
+import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.ts'
+import { useNonce } from './utils/nonce-provider.ts'
+import { makeTimings, time } from './utils/timing.server.ts'
+import { useOptionalUser, useUser } from './utils/user.ts'
+import { useToast } from './utils/useToast.tsx'
+
 
 export const links: LinksFunction = () => {
 	return [
@@ -102,7 +80,7 @@ export const links: LinksFunction = () => {
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
+		{ title: data ? 'Team8' : 'Error | Team8' },
 		{ name: 'description', content: `Your own captain's log` },
 	]
 }
@@ -210,7 +188,22 @@ function App() {
 
 	return (
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
-			<div className="flex h-screen flex-col justify-between">
+			<div className="bd grid h-screen grid-rows-[50px_1fr_50px] border-solid">
+				<header className="border">
+					{user ? (
+						<UserDropdown />
+					) : (
+						<Button asChild variant="default" size="sm">
+							<Link to="/login">Log In</Link>
+						</Button>
+					)}
+				</header>
+				<main className="h-full">
+					<Outlet />
+				</main>
+				<footer className="border">footer</footer>
+			</div>
+			{/* <div className="flex h-screen flex-col justify-between">
 				<header className="container py-6">
 					<nav className="flex items-center justify-between">
 						<Link to="/">
@@ -223,13 +216,7 @@ function App() {
 							</div>
 						)}
 						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="sm">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
+							
 						</div>
 					</nav>
 				</header>
@@ -245,8 +232,7 @@ function App() {
 					</Link>
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 				</div>
-			</div>
-			<Confetti confetti={data.flash?.confetti} />
+			</div> */}
 			<Toaster />
 		</Document>
 	)

@@ -44,8 +44,8 @@
 	}
 
 	.dark {
-		--background: 222.2 84% 4.9%;
-		--foreground: 210 40% 98%;
+		--background: 30 10% 10%;
+		--foreground: 244 50% 90%;
 
 		/* prefixed with foreground because it should look good on the background */
 		--foreground-danger: -4 84% 60%;
@@ -63,8 +63,8 @@
 		--input: 217.2 32.6% 17.5%;
 		--input-invalid: 0 62.8% 30.6%;
 
-		--primary: 210 40% 98%;
-		--primary-foreground: 222.2 47.4% 11.2%;
+		--primary: 210 100% 50%;
+		--primary-foreground: 244 50% 90%;
 
 		--secondary: 217.2 32.6% 17.5%;
 		--secondary-foreground: 210 40% 98%;

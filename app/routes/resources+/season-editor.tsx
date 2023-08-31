@@ -1,7 +1,7 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
-import { useFetcher } from '@remix-run/react'
+import { useFetcher, useNavigate } from '@remix-run/react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
 import { StatusButton } from '~/components/ui/status-button.tsx'
@@ -11,6 +11,8 @@ import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { addYears } from 'date-fns'
+import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
+import { FormActions } from '~/components/FormActions.tsx'
 
 export const SeasonEditorSchema = z.object({
 	id: z.string().optional(),
@@ -88,6 +90,8 @@ export function SeasonEditor({
 	clubId: string
 	season?: { id: string; name: string; start: string; end: string }
 }) {
+	const navigate = useNavigate()
+
 	const seasonEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
 		id: 'season-editor',
@@ -105,69 +109,68 @@ export function SeasonEditor({
 	})
 
 	return (
-		<seasonEditorFetcher.Form
-			method="post"
-			action="/resources/season-editor"
-			className="flex h-full flex-col gap-y-4 overflow-x-hidden px-10 pb-28 pt-12"
-			{...form.props}
-		>
-			<input name="clubId" type="hidden" value={clubId} />
-			<input name="id" type="hidden" value={season?.id} />
-			{season?.id ? 'Edit Season....' : 'Add Season'}
-			<Field
-				labelProps={{ children: 'Name' }}
-				inputProps={{
-					...conform.input(fields.name),
-					autoFocus: true,
-				}}
-				errors={fields.name.errors}
-				className="flex flex-col gap-y-2"
-			/>
-			<Field
-				labelProps={{ children: 'Start date' }}
-				inputProps={{
-					type: 'date',
-					...conform.input(fields.start),
-				}}
-				errors={fields.name.errors}
-				className="flex flex-col gap-y-2"
-			/>
-			<Field
-				labelProps={{ children: 'End date' }}
-				inputProps={{
-					type: 'date',
-					...conform.input(fields.end),
-				}}
-				errors={fields.name.errors}
-				className="flex flex-col gap-y-2"
-			/>
-			<ErrorList errors={form.errors} id={form.errorId} />
-			<div>
-				<Button
-					variant="destructive"
-					type="reset"
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon name="reset" className="scale-125 max-md:scale-150 md:mr-2" />
-					<span className="max-md:hidden">Reset</span>
-				</Button>
-				<StatusButton
-					status={
-						seasonEditorFetcher.state === 'submitting'
-							? 'pending'
-							: seasonEditorFetcher.data?.status ?? 'idle'
-					}
-					type="submit"
-					disabled={seasonEditorFetcher.state !== 'idle'}
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon
-						name="arrow-right"
-						className="scale-125 max-md:scale-150 md:mr-2"
-					/>
-					<span className="max-md:hidden">Submit</span>
-				</StatusButton>
-			</div>
-		</seasonEditorFetcher.Form>
+		<Dialog>
+			<DialogHeader>
+				{season?.id ? 'Edit season....' : 'Add season'}
+			</DialogHeader>
+
+			<seasonEditorFetcher.Form
+				method="post"
+				action="/resources/season-editor"
+				{...form.props}
+			>
+				<input name="clubId" type="hidden" value={clubId} />
+				<input name="id" type="hidden" value={season?.id} />
+				<Field
+					labelProps={{ children: 'Name' }}
+					inputProps={{
+						...conform.input(fields.name),
+						autoFocus: true,
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<Field
+					labelProps={{ children: 'Start date' }}
+					inputProps={{
+						type: 'date',
+						...conform.input(fields.start),
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<Field
+					labelProps={{ children: 'End date' }}
+					inputProps={{
+						type: 'date',
+						...conform.input(fields.end),
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<ErrorList errors={form.errors} id={form.errorId} />
+				<FormActions>
+					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
+						Cancel
+					</Button>
+					<StatusButton
+						status={
+							seasonEditorFetcher.state === 'submitting'
+								? 'pending'
+								: seasonEditorFetcher.data?.status ?? 'idle'
+						}
+						type="submit"
+						disabled={seasonEditorFetcher.state !== 'idle'}
+						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+					>
+						<Icon
+							name="arrow-right"
+							className="scale-125 max-md:scale-150 md:mr-2"
+						/>
+						<span className="max-md:hidden">Submit</span>
+					</StatusButton>
+				</FormActions>
+			</seasonEditorFetcher.Form>
+		</Dialog>
 	)
 }

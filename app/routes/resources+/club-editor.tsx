@@ -1,7 +1,7 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
-import { useFetcher } from '@remix-run/react'
+import { useFetcher, useNavigate } from '@remix-run/react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
 import { StatusButton } from '~/components/ui/status-button.tsx'
@@ -11,6 +11,8 @@ import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+import { Dialog } from '~/components/Dialog.tsx'
+import { FormActions } from '~/components/FormActions.tsx'
 
 export const ClubEditorSchema = z.object({
 	id: z.string().optional(),
@@ -82,6 +84,7 @@ export function ClubEditor({
 }: {
 	club?: { id: string; name: string; description: string }
 }) {
+	const navigate = useNavigate()
 	const clubEditorFetcher = useFetcher<typeof action>()
 
 	const [form, fields] = useForm({
@@ -99,59 +102,56 @@ export function ClubEditor({
 	})
 
 	return (
-		<clubEditorFetcher.Form
-			method="post"
-			action="/resources/club-editor"
-			className="flex h-full flex-col gap-y-4 overflow-x-hidden px-10 pb-28 pt-12"
-			{...form.props}
-		>
-			<input name="id" type="hidden" value={club?.id} />
-			Edit club....
-			<Field
-				labelProps={{ children: 'Name' }}
-				inputProps={{
-					...conform.input(fields.name),
-					autoFocus: true,
-				}}
-				errors={fields.name.errors}
-				className="flex flex-col gap-y-2"
-			/>
-			<TextareaField
-				labelProps={{ children: 'Description' }}
-				textareaProps={{
-					...conform.textarea(fields.description),
-					className: 'flex-1 resize-none',
-				}}
-				errors={fields.description.errors}
-				className="flex flex-1 flex-col gap-y-2"
-			/>
-			<ErrorList errors={form.errors} id={form.errorId} />
-			<div className={floatingToolbarClassName}>
-				<Button
-					variant="destructive"
-					type="reset"
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon name="reset" className="scale-125 max-md:scale-150 md:mr-2" />
-					<span className="max-md:hidden">Reset</span>
-				</Button>
-				<StatusButton
-					status={
-						clubEditorFetcher.state === 'submitting'
-							? 'pending'
-							: clubEditorFetcher.data?.status ?? 'idle'
-					}
-					type="submit"
-					disabled={clubEditorFetcher.state !== 'idle'}
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon
-						name="arrow-right"
-						className="scale-125 max-md:scale-150 md:mr-2"
-					/>
-					<span className="max-md:hidden">Submit</span>
-				</StatusButton>
-			</div>
-		</clubEditorFetcher.Form>
+		<Dialog>
+			<clubEditorFetcher.Form
+				method="post"
+				action="/resources/club-editor"
+				className="flex h-full flex-col gap-y-4 overflow-x-hidden px-10 pb-28 pt-12"
+				{...form.props}
+			>
+				<input name="id" type="hidden" value={club?.id} />
+				Edit club....
+				<Field
+					labelProps={{ children: 'Name' }}
+					inputProps={{
+						...conform.input(fields.name),
+						autoFocus: true,
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<TextareaField
+					labelProps={{ children: 'Description' }}
+					textareaProps={{
+						...conform.textarea(fields.description),
+						className: 'flex-1 resize-none',
+					}}
+					errors={fields.description.errors}
+					className="flex flex-1 flex-col gap-y-2"
+				/>
+				<ErrorList errors={form.errors} id={form.errorId} />
+				<FormActions>
+					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
+						Cancel
+					</Button>
+					<StatusButton
+						status={
+							clubEditorFetcher.state === 'submitting'
+								? 'pending'
+								: clubEditorFetcher.data?.status ?? 'idle'
+						}
+						type="submit"
+						disabled={clubEditorFetcher.state !== 'idle'}
+						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+					>
+						<Icon
+							name="arrow-right"
+							className="scale-125 max-md:scale-150 md:mr-2"
+						/>
+						<span className="max-md:hidden">Submit</span>
+					</StatusButton>
+				</FormActions>
+			</clubEditorFetcher.Form>
+		</Dialog>
 	)
 }

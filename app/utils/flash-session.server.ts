@@ -12,7 +12,6 @@ const toastMessageSchema = z.object({
 })
 
 const flashSessionValuesSchema = z.object({
-	confetti: z.string().optional(),
 	toast: toastMessageSchema.optional(),
 })
 
@@ -67,16 +66,6 @@ export async function redirectWithFlash(
 		...init,
 		headers: await flashMessage(flash, init?.headers),
 	})
-}
-/**
- * Helper method used to redirect the user to a new page with confetti raining down
- * If thrown needs to be awaited
- * @param url Redirect URL
- * @param init Additional response options
- * @returns Returns a redirect response with confetti stored in the session
- */
-export function redirectWithConfetti(url: string, init?: ResponseInit) {
-	return redirectWithFlash(url, { confetti: randomUUID() }, init)
 }
 
 /**

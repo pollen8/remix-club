@@ -5,6 +5,7 @@ import {
 	Form,
 	Link,
 	NavLink,
+	Outlet,
 	useActionData,
 	useFormAction,
 	useLoaderData,
@@ -113,6 +114,7 @@ export default function ClubRoute() {
 					</p>
 				</div>
 			</div>
+
 			<NavLink to="members">
 				<Icon name="person">Members</Icon>
 			</NavLink>
@@ -144,6 +146,7 @@ export default function ClubRoute() {
 							</Link>
 						</Button>
 					</div>
+					<Outlet />
 				</div>
 			) : null}
 		</>

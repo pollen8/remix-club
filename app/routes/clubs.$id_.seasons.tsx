@@ -1,5 +1,5 @@
 import { DataFunctionArgs, HeadersFunction, json } from '@remix-run/node'
-import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { Outlet, useLoaderData } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'
 import {
 	combineServerTimings,
@@ -12,6 +12,9 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { parse } from '@conform-to/zod'
 import { DeleteButton } from '~/components/ui/deleteButton.tsx'
+import { TableTitle } from '~/components/TableTitle.tsx'
+import { ButtonLink } from '~/components/ButtonLink.tsx'
+import { Th, Table, Td } from '~/components/Table.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club seasons loader')
@@ -40,38 +43,41 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 export default function ClubsSeasonsIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<div className="container pt-12">
-			<div className="container mb-48 mt-36 flex flex-col items-center justify-center gap-6">
-				<h1 className="text-h1">Seasons</h1>
-				<NavLink to="new">
-					<Icon name="plus">New Season</Icon>
-				</NavLink>
-				<table>
+		<div className="container pt-6">
+			<div>
+				<TableTitle>
+					<h1 className="text-h1">Seasons</h1>
+					<ButtonLink to="new">
+						<Icon name="plus">New Season</Icon>
+					</ButtonLink>
+				</TableTitle>
+				<Table>
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th>Id</th>
-							<th></th>
+							<Th>Name</Th>
+							<Th>Id</Th>
+							<Th></Th>
 						</tr>
 					</thead>
 					<tbody>
 						{data.seasons.map(season => (
 							<tr key={season.id}>
-								<td>{season.name}</td>
-								<td>{season.id}</td>
-								<td>
+								<Td>{season.name}</Td>
+								<Td>{season.id}</Td>
+								<Td className="w-1">
 									<DeleteButton
 										schema={DeleteFormSchema}
 										intent="delete-season"
+										size="sm"
 										action={action}
 										id={season.id}
 										clubId={data.clubId ?? ''}
 									/>
-								</td>
+								</Td>
 							</tr>
 						))}
 					</tbody>
-				</table>
+				</Table>
 				<Outlet />
 			</div>
 		</div>

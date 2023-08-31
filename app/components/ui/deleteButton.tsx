@@ -10,6 +10,7 @@ import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { useForm } from '@conform-to/react'
 import { StatusButton } from '~/components/ui/status-button.tsx'
 import { ErrorList } from '~/components/forms.tsx'
+import { ButtonProps } from './button.tsx'
 
 type Props = {
 	id: string
@@ -17,9 +18,17 @@ type Props = {
 	clubId: string
 	intent: string | undefined
 	action: any
+	size?: ButtonProps['size']
 }
 
-export function DeleteButton({ id, schema, clubId, intent, action }: Props) {
+export function DeleteButton({
+	id,
+	schema,
+	clubId,
+	intent,
+	action,
+	size,
+}: Props) {
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
 	const formAction = useFormAction()
@@ -38,6 +47,7 @@ export function DeleteButton({ id, schema, clubId, intent, action }: Props) {
 			<StatusButton
 				type="submit"
 				name="intent"
+				size={size}
 				value={intent}
 				variant="destructive"
 				status={

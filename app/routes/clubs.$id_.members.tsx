@@ -12,6 +12,9 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { parse } from '@conform-to/zod'
 import { DeleteButton } from '~/components/ui/deleteButton.tsx'
+import { Table, Td, Th } from '~/components/Table.tsx'
+import { ButtonLink } from '~/components/ButtonLink.tsx'
+import { TableTitle } from '~/components/TableTitle.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club members loader')
@@ -47,40 +50,43 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 export default function ClubsMembersIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<div className="container pt-12">
-			<div className="container mb-48 mt-36 flex flex-col items-center justify-center gap-6">
+		<div className="container pt-6">
+			<TableTitle>
 				<h1 className="text-h1">Members</h1>
-				<NavLink to="new">
+				<ButtonLink to="new">
 					<Icon name="plus">New Member</Icon>
-				</NavLink>
-				<table>
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Id</th>
-							<th></th>
+				</ButtonLink>
+			</TableTitle>
+			<Table>
+				<thead>
+					<tr>
+						<Th>Name</Th>
+						<Th>Id</Th>
+						<Th></Th>
+					</tr>
+				</thead>
+				<tbody>
+					{/** @TODO  empty data cta */}
+					{data.members.map(member => (
+						<tr key={member.id}>
+							<Td>{member.name}</Td>
+							<Td>{member.id}</Td>
+							<Td className="w-1">
+								{/*** @TODO replace with modal confirmation */}
+								<DeleteButton
+									id={member.id}
+									size="sm"
+									clubId={data.clubId ?? ''}
+									action={action}
+									schema={DeleteFormSchema}
+									intent="delete-member"
+								/>
+							</Td>
 						</tr>
-					</thead>
-					<tbody>
-						{data.members.map(member => (
-							<tr key={member.id}>
-								<td>{member.name}</td>
-								<td>{member.id}</td>
-								<td>
-									<DeleteButton
-										id={member.id}
-										clubId={data.clubId ?? ''}
-										action={action}
-										schema={DeleteFormSchema}
-										intent="delete-member"
-									/>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-				<Outlet />
-			</div>
+					))}
+				</tbody>
+			</Table>
+			<Outlet />
 		</div>
 	)
 }
