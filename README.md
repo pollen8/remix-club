@@ -53,6 +53,10 @@ assets you can use in your material:
 
 You rock 🪨
 
+---
+
+`npx upgrade-remix`
+
 UX https://ui.shadcn.com/
 
-login rob.clayburn Flower99!
+login pollen8 Flower99!

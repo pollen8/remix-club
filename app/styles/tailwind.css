@@ -47,6 +47,7 @@
 		--background: 30 10% 10%;
 		--foreground: 244 50% 90%;
 
+		--toast-background: 244 50% 90%;
 		/* prefixed with foreground because it should look good on the background */
 		--foreground-danger: -4 84% 60%;
 
@@ -75,7 +76,7 @@
 		--destructive: 0 62.8% 30.6%;
 		--destructive-foreground: 0 85.7% 97.3%;
 
-		--ring: 217.2 32.6% 17.5%;
+		--ring: 217.2 32.6% 77.5%;
 	}
 }
 
