@@ -9,10 +9,7 @@ export const TableTitle = ({
 	return (
 		<div
 			{...rest}
-			className={cn(
-				'flex w-full items-baseline justify-between pr-4',
-				className,
-			)}
+			className={cn('flex w-full items-baseline justify-between', className)}
 		>
 			{children}
 		</div>

@@ -1,5 +1,5 @@
 import { DataFunctionArgs, HeadersFunction, json } from '@remix-run/node'
-import { Outlet, useLoaderData } from '@remix-run/react'
+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'
 import {
 	combineServerTimings,
@@ -12,25 +12,26 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { parse } from '@conform-to/zod'
 import { DeleteButton } from '~/components/ui/deleteButton.tsx'
-import { TableTitle } from '~/components/TableTitle.tsx'
+import { Table, Td, Th } from '~/components/Table.tsx'
 import { ButtonLink } from '~/components/ButtonLink.tsx'
-import { Th, Table, Td } from '~/components/Table.tsx'
-import { PageContainer } from '~/components/PageContainer.tsx'
+import { TableTitle } from '~/components/TableTitle.tsx'
+import { Button } from '@react-email/components'
+import { Link } from 'lucide-react'
 
 export async function loader({ request, params }: DataFunctionArgs) {
-	const timings = makeTimings('club seasons loader')
+	const timings = makeTimings('club members loader')
 
-	const seasons = await time(
+	const teams = await time(
 		() =>
-			prisma.season.findMany({
+			prisma.team.findMany({
 				where: {
 					clubId: params.id,
 				},
 			}),
-		{ timings, type: 'find club seasons' },
+		{ timings, type: 'find club teams' },
 	)
 	return json(
-		{ seasons, clubId: params.id },
+		{ teams, clubId: params.id },
 		{ headers: { 'Server-Timing': timings.toString() } },
 	)
 }
@@ -41,14 +42,14 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 	}
 }
 
-export default function ClubsSeasonsIndexRoute() {
+export default function ClubsTeamsIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<div>
+		<>
 			<TableTitle>
-				<h2 className="text-h2">Seasons</h2>
+				<h2 className="text-h2">Teams</h2>
 				<ButtonLink to="new">
-					<Icon name="plus">New Season</Icon>
+					<Icon name="plus">New Team</Icon>
 				</ButtonLink>
 			</TableTitle>
 			<Table>
@@ -60,18 +61,23 @@ export default function ClubsSeasonsIndexRoute() {
 					</tr>
 				</thead>
 				<tbody>
-					{data.seasons.map(season => (
-						<tr key={season.id}>
-							<Td>{season.name}</Td>
-							<Td>{season.id}</Td>
-							<Td className="w-1">
+					{/** @TODO  empty data cta */}
+					{data.teams.map(team => (
+						<tr key={team.id}>
+							<Td>{team.name}</Td>
+							<Td>{team.id}</Td>
+							<Td className="w-20">
+								<ButtonLink to={`${team.id}/edit`}>
+									<Icon name="pencil-1" />
+								</ButtonLink>
+								{/*** @TODO replace with modal confirmation */}
 								<DeleteButton
-									schema={DeleteFormSchema}
-									intent="delete-season"
+									id={team.id}
 									size="sm"
-									action={action}
-									id={season.id}
 									clubId={data.clubId ?? ''}
+									action={action}
+									schema={DeleteFormSchema}
+									intent="delete-team"
 								/>
 							</Td>
 						</tr>
@@ -79,12 +85,12 @@ export default function ClubsSeasonsIndexRoute() {
 				</tbody>
 			</Table>
 			<Outlet />
-		</div>
+		</>
 	)
 }
 
 const DeleteFormSchema = z.object({
-	intent: z.literal('delete-season'),
+	intent: z.literal('delete-team'),
 	id: z.string(),
 	clubId: z.string(),
 })
@@ -109,26 +115,26 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 	const { clubId, id } = submission.value
 
-	const season = await prisma.season.findFirst({
+	const team = await prisma.team.findFirst({
 		select: { id: true },
 		where: {
 			id: id,
 		},
 	})
 
-	if (!season) {
-		submission.error.id = ['Season not found']
+	if (!team) {
+		submission.error.id = ['Team not found']
 		return json({ status: 'error', submission } as const, {
 			status: 404,
 		})
 	}
 
-	await prisma.season.delete({
-		where: { id: season.id },
+	await prisma.team.delete({
+		where: { id: team.id },
 	})
 
-	return redirectWithToast(`/clubs/${clubId}/seasons`, {
-		title: 'Season removed',
+	return redirectWithToast(`/clubs/${clubId}/teams`, {
+		title: 'Team removed',
 		variant: 'destructive',
 	})
 }

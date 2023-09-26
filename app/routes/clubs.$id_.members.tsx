@@ -15,6 +15,7 @@ import { DeleteButton } from '~/components/ui/deleteButton.tsx'
 import { Table, Td, Th } from '~/components/Table.tsx'
 import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { TableTitle } from '~/components/TableTitle.tsx'
+import { PageContainer } from '~/components/PageContainer.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club members loader')
@@ -50,9 +51,9 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 export default function ClubsMembersIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<div className="container pt-6">
+		<>
 			<TableTitle>
-				<h1 className="text-h1">Members</h1>
+				<h2 className="text-h2">Members</h2>
 				<ButtonLink to="new">
 					<Icon name="plus">New Member</Icon>
 				</ButtonLink>
@@ -87,7 +88,7 @@ export default function ClubsMembersIndexRoute() {
 				</tbody>
 			</Table>
 			<Outlet />
-		</div>
+		</>
 	)
 }
 

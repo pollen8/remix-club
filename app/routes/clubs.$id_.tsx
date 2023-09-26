@@ -13,6 +13,7 @@ import {
 } from '@remix-run/react'
 import { formatDistanceToNow } from 'date-fns'
 import { z } from 'zod'
+import { PageContainer } from '~/components/PageContainer.tsx'
 import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
 import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { ErrorList } from '~/components/forms.tsx'
@@ -105,32 +106,10 @@ export default function ClubRoute() {
 	const data = useLoaderData<typeof loader>()
 
 	return (
-		<>
-			<div className=" inset-0 flex flex-col px-10">
-				<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.club.name}</h2>
-				<div className={`${data.isOwner ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
-					<p className="whitespace-break-spaces text-sm md:text-lg">
-						{data.club.description}
-					</p>
-				</div>
-			</div>
-
-			<NavLink to="members">
-				<Icon name="person">Members</Icon>
-			</NavLink>
-			<NavLink to="seasons">
-				<Icon name="calendar-month">Seasons</Icon>
-			</NavLink>
+		<PageContainer>
+			<h1 className="text-h1">{data.club.name}</h1>
 			{data.isOwner ? (
-				<div className={floatingToolbarClassName}>
-					<span
-						className="text-sm text-foreground/90 max-[524px]:hidden"
-						title={data.dateDisplay}
-					>
-						<Icon name="clock" className="mr-2 scale-125">
-							{data.timeAgo} ago
-						</Icon>
-					</span>
+				<div>
 					<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
 						<DeleteClub id={data.club.id} />
 						<Button
@@ -146,10 +125,20 @@ export default function ClubRoute() {
 							</Link>
 						</Button>
 					</div>
-					<Outlet />
 				</div>
 			) : null}
-		</>
+
+			<NavLink to="members">
+				<Icon name="person">Members</Icon>
+			</NavLink>
+			<NavLink to="seasons">
+				<Icon name="calendar-month">Seasons</Icon>
+			</NavLink>
+			<NavLink to="teams">
+				<Icon name="calendar-month">Teams</Icon>
+			</NavLink>
+			<Outlet />
+		</PageContainer>
 	)
 }
 

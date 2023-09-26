@@ -39,6 +39,9 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 	}
 }
 
+/**
+ * Page shown when not further route applicable
+ */
 export default function ClubsIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 

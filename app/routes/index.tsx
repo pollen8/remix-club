@@ -5,12 +5,9 @@ export const meta: V2_MetaFunction = () => [{ title: 'Remix Club' }]
 
 export async function loader({ request }: DataFunctionArgs) {
 	const userId = await requireAnonymous(request)
-	console.log('user id', userId)
 	return null
-	// if (searchTerm === '') {
-	// 	return redirect('/clubs')
-	// }
 }
+
 export default function Index() {
 	return <div>General non logged in home page</div>
 }
