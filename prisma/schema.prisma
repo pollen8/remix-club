@@ -187,6 +187,8 @@ model MemberAttendance {
   @@id([memberId, clubId, seasonId])
 }
 
+
+
 model Team {
   id              String          @id @unique @default(cuid())
   name            String
@@ -194,6 +196,7 @@ model Team {
   clubId          String
   season          Season          @relation(fields: [seasonId], references: [id])
   seasonId        String
+  teamType        String?
   teamMatch       Match[]         @relation(name: "Match")
   oppositionMatch Match[]         @relation(name: "OppositionMatch")
   players         PlayerMatches[]
