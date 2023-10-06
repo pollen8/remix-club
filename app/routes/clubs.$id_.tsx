@@ -19,6 +19,13 @@ import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { ErrorList } from '~/components/forms.tsx'
 import { Button } from '~/components/ui/button.tsx'
 import { Icon } from '~/components/ui/icon.tsx'
+import {
+	Menubar,
+	MenubarContent,
+	MenubarItem,
+	MenubarMenu,
+	MenubarTrigger,
+} from '~/components/ui/menubar.tsx'
 import { StatusButton } from '~/components/ui/status-button.tsx'
 import { getUserId, requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
@@ -128,15 +135,25 @@ export default function ClubRoute() {
 				</div>
 			) : null}
 
-			<NavLink to="members">
-				<Icon name="person">Members</Icon>
-			</NavLink>
-			<NavLink to="seasons">
-				<Icon name="calendar-month">Seasons</Icon>
-			</NavLink>
-			<NavLink to="teams">
-				<Icon name="calendar-month">Teams</Icon>
-			</NavLink>
+			<Menubar>
+				<MenubarMenu>
+					<MenubarTrigger className="cursor-pointer" asChild>
+						<Link to="members">
+							<Icon name="person">Members</Icon>
+						</Link>
+					</MenubarTrigger>
+					<MenubarTrigger className="cursor-pointer" asChild>
+						<Link to="seasons">
+							<Icon name="calendar-month">Seasons</Icon>
+						</Link>
+					</MenubarTrigger>
+					<MenubarTrigger className="cursor-pointer" asChild>
+						<Link to="teams">
+							<Icon name="calendar-month">Teams</Icon>
+						</Link>
+					</MenubarTrigger>
+				</MenubarMenu>
+			</Menubar>
 			<Outlet />
 		</PageContainer>
 	)

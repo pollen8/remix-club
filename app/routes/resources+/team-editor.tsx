@@ -1,4 +1,4 @@
-import { conform, useForm } from '@conform-to/react'
+import { conform, useFieldList, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher, useNavigate } from '@remix-run/react'
@@ -12,22 +12,48 @@ import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { FormActions } from '~/components/FormActions.tsx'
 import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select.tsx'
+import { FormGroup } from '~/components/FormGroup.tsx'
+import { useState } from 'react'
+import { Member, Season, Team } from '@prisma/client'
+import { MultiCheckbox } from '~/components/mutli-checkbox.tsx'
 
+const teamTypes = [
+	'open6',
+	'ladies6',
+	'mens6',
+	'mixed6',
+	'open4',
+	'ladies4',
+	'mens4',
+	'mixed4',
+]
+
+const teamValues: [string, ...string[]] = [teamTypes[0], ...teamTypes]
 export const TeamEditorSchema = z.object({
 	id: z.string().optional(),
 	clubId: z.string(),
 	seasonId: z.string(),
+	teamType: z.enum(teamValues),
+	members: z.array(z.string()),
 	name: z.string().min(1),
 })
 
 export async function action({ request, params }: DataFunctionArgs) {
-	console.log('submit')
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
+	console.log('submit', formData)
 	const submission = parse(formData, {
 		schema: TeamEditorSchema,
 		acceptMultipleErrors: () => true,
 	})
+	console.log('submission', submission)
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
 	}
@@ -42,11 +68,12 @@ export async function action({ request, params }: DataFunctionArgs) {
 	}
 	let team
 
-	const { name, id, clubId, seasonId } = submission.value
+	const { name, id, clubId, seasonId, teamType } = submission.value
 
 	// @TODO connect to search
 	const data = {
 		name,
+		teamType,
 		club: {
 			connect: {
 				id: clubId,
@@ -76,6 +103,7 @@ export async function action({ request, params }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
+		console.log('update', data, select)
 		team = await prisma.team.update({
 			where: { id },
 			data,
@@ -93,11 +121,14 @@ export function TeamEditor({
 	clubId,
 	team,
 	seasons,
+	members,
 }: {
 	clubId: string
-	seasons: any[]
-	team?: { id: string; name: string }
+	seasons: Season[]
+	team?: Team
+	members: Member[]
 }) {
+	console.log('team', team)
 	const navigate = useNavigate()
 	const teamEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
@@ -105,14 +136,21 @@ export function TeamEditor({
 		constraint: getFieldsetConstraint(TeamEditorSchema),
 		lastSubmission: teamEditorFetcher.data?.submission,
 		onValidate({ formData }) {
+			console.log('validate', parse(formData, { schema: TeamEditorSchema }))
 			return parse(formData, { schema: TeamEditorSchema })
 		},
 		defaultValue: {
-			name: team?.name,
+			...team,
 		},
 		shouldRevalidate: 'onBlur',
 	})
 
+	const list = useFieldList(form.ref, fields.members)
+	const [players, setPlayers] = useState([])
+	console.log('errors', form.errors)
+	// console.log(teamEditorFetcher)
+	console.log(conform.input(fields.teamType))
+	console.log(fields.members)
 	return (
 		<>
 			<Dialog>
@@ -124,14 +162,21 @@ export function TeamEditor({
 				>
 					<input name="clubId" type="hidden" value={clubId} />
 					<input name="id" type="hidden" value={team?.id} />
-					<label htmlFor="season">Season</label>
-					<select {...conform.input(fields.seasonId)}>
-						{seasons.map(season => (
-							<option key={season.id} value={season.id}>
-								{season.name}
-							</option>
-						))}
-					</select>
+
+					<FormGroup>
+						<Select {...conform.input(fields.seasonId)}>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Season" />
+							</SelectTrigger>
+							<SelectContent>
+								{seasons.map(season => (
+									<SelectItem key={season.id} value={season.id}>
+										{season.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</FormGroup>
 					<Field
 						labelProps={{ children: 'Name' }}
 						inputProps={{
@@ -141,7 +186,30 @@ export function TeamEditor({
 						errors={fields.name.errors}
 						className="flex flex-col gap-y-2"
 					/>
+					<FormGroup>
+						<Select {...conform.input(fields.teamType)}>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Team type" />
+							</SelectTrigger>
+							<SelectContent>
+								{teamTypes.map(teamType => (
+									<SelectItem key={teamType} value={teamType}>
+										{teamType}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</FormGroup>
 
+					<MultiCheckbox
+						field={fields.members}
+						label="Players"
+						items={members.map(m => ({
+							id: m.id,
+							label: m.name,
+							value: m.id,
+						}))}
+					/>
 					<ErrorList errors={form.errors} id={form.errorId} />
 					<FormActions>
 						<Button

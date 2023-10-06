@@ -56,7 +56,7 @@ export default function ClubsTeamsIndexRoute() {
 				<thead>
 					<tr>
 						<Th>Name</Th>
-						<Th>Id</Th>
+						<Th>Type</Th>
 						<Th></Th>
 					</tr>
 				</thead>
@@ -65,7 +65,7 @@ export default function ClubsTeamsIndexRoute() {
 					{data.teams.map(team => (
 						<tr key={team.id}>
 							<Td>{team.name}</Td>
-							<Td>{team.id}</Td>
+							<Td>{team.teamType}</Td>
 							<Td className="w-20">
 								<ButtonLink to={`${team.id}/edit`}>
 									<Icon name="pencil-1" />

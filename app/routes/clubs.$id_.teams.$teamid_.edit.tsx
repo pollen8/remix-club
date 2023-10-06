@@ -1,5 +1,5 @@
 import { requireUserId } from '~/utils/auth.server.ts'
-
+import type { Member, Season, Team } from '@prisma/client'
 import { json } from '@remix-run/router'
 import { DataFunctionArgs } from '@remix-run/server-runtime'
 import { TeamEditor } from './resources+/team-editor.tsx'
@@ -10,7 +10,6 @@ import { prisma } from '~/utils/db.server.ts'
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('new team loader')
 	await requireUserId(request)
-	console.log('#params', params)
 	const seasons = await time(
 		() =>
 			prisma.season.findMany({
@@ -23,15 +22,41 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	const team = await time(
 		() =>
 			prisma.team.findFirst({
+				select: {
+					id: true,
+					name: true,
+					clubId: true,
+					teamType: true,
+					seasonId: true,
+					members: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
+				},
 				where: {
 					id: params.teamId,
 				},
 			}),
 		{ timings, type: 'load team' },
 	)
-	console.log('team', team)
+	const members = await time(
+		() =>
+			prisma.member.findMany({
+				where: {
+					clubs: {
+						some: {
+							id: params.id,
+						},
+					},
+				},
+			}),
+		{ timings, type: 'find club members' },
+	)
+
 	return json(
-		{ seasons, id: params.id, team },
+		{ seasons, id: params.id, team, members },
 		{ headers: { 'Server-Timing': timings.toString() } },
 	)
 }
@@ -39,8 +64,16 @@ export async function loader({ request, params }: DataFunctionArgs) {
 export default function NewTeamRoute() {
 	const data = useLoaderData<typeof loader>() as {
 		id: string
-		seasons: { id: string; name: string }[]
-		team: { id: string; name: string }
+		seasons: Season[]
+		team: Team
+		members: Member[]
 	}
-	return <TeamEditor clubId={data.id} team={data.team} seasons={data.seasons} />
+	return (
+		<TeamEditor
+			clubId={data.id}
+			members={data.members}
+			team={data.team}
+			seasons={data.seasons}
+		/>
+	)
 }
