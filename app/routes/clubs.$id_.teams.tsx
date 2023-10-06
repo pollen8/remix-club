@@ -17,6 +17,7 @@ import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { TableTitle } from '~/components/TableTitle.tsx'
 import { Button } from '@react-email/components'
 import { Link } from 'lucide-react'
+import { ButtonGroup } from '~/components/ButtonGroup.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club members loader')
@@ -67,18 +68,20 @@ export default function ClubsTeamsIndexRoute() {
 							<Td>{team.name}</Td>
 							<Td>{team.teamType}</Td>
 							<Td className="w-20">
-								<ButtonLink to={`${team.id}/edit`}>
-									<Icon name="pencil-1" />
-								</ButtonLink>
-								{/*** @TODO replace with modal confirmation */}
-								<DeleteButton
-									id={team.id}
-									size="sm"
-									clubId={data.clubId ?? ''}
-									action={action}
-									schema={DeleteFormSchema}
-									intent="delete-team"
-								/>
+								<ButtonGroup>
+									<ButtonLink size="sm" variant="ghost" to={`${team.id}/edit`}>
+										<Icon name="pencil-1" />
+									</ButtonLink>
+									{/*** @TODO replace with modal confirmation */}
+									<DeleteButton
+										id={team.id}
+										size="sm"
+										clubId={data.clubId ?? ''}
+										action={action}
+										schema={DeleteFormSchema}
+										intent="delete-team"
+									/>
+								</ButtonGroup>
 							</Td>
 						</tr>
 					))}

@@ -13,6 +13,7 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { Dialog } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
+import { SubmitButton } from '~/components/SubmitButton.tsx'
 
 export const ClubEditorSchema = z.object({
 	id: z.string().optional(),
@@ -25,7 +26,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: ClubEditorSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -134,22 +134,7 @@ export function ClubEditor({
 					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
 						Cancel
 					</Button>
-					<StatusButton
-						status={
-							clubEditorFetcher.state === 'submitting'
-								? 'pending'
-								: clubEditorFetcher.data?.status ?? 'idle'
-						}
-						type="submit"
-						disabled={clubEditorFetcher.state !== 'idle'}
-						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-					>
-						<Icon
-							name="arrow-right"
-							className="scale-125 max-md:scale-150 md:mr-2"
-						/>
-						<span className="max-md:hidden">Submit</span>
-					</StatusButton>
+					<SubmitButton fetcher={clubEditorFetcher} />
 				</FormActions>
 			</clubEditorFetcher.Form>
 		</Dialog>

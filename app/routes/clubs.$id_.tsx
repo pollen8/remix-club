@@ -71,7 +71,6 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (!submission.value || submission.intent !== 'submit') {
 		return json(
@@ -114,26 +113,29 @@ export default function ClubRoute() {
 
 	return (
 		<PageContainer>
-			<h1 className="text-h1">{data.club.name}</h1>
-			{data.isOwner ? (
-				<div>
-					<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
-						<DeleteClub id={data.club.id} />
-						<Button
-							asChild
-							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-						>
-							<Link to="edit">
-								<Icon
-									name="pencil-1"
-									className="scale-125 max-md:scale-150 md:mr-2"
-								/>
-								<span className="max-md:hidden">Edit</span>
-							</Link>
-						</Button>
+			<div className="flex items-center justify-between">
+				<h1 className="text-h1">{data.club.name}</h1>
+				{data.isOwner ? (
+					<div>
+						<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
+							<DeleteClub id={data.club.id} />
+							<Button
+								asChild
+								variant="ghost"
+								className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+							>
+								<Link to="edit">
+									<Icon
+										name="pencil-1"
+										className="scale-125 max-md:scale-150 md:mr-2"
+									/>
+									<span className="max-md:hidden">Edit</span>
+								</Link>
+							</Button>
+						</div>
 					</div>
-				</div>
-			) : null}
+				) : null}
+			</div>
 
 			<Menubar>
 				<MenubarMenu>

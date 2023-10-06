@@ -65,7 +65,7 @@ export default function NewTeamRoute() {
 	const data = useLoaderData<typeof loader>() as {
 		id: string
 		seasons: Season[]
-		team: Team
+		team: Team & { members: Member[] }
 		members: Member[]
 	}
 	return (

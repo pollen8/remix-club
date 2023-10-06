@@ -4,13 +4,13 @@ import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher } from '@remix-run/react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
 import { Icon } from '~/components/ui/icon.tsx'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+import { SubmitButton } from '~/components/SubmitButton.tsx'
 
 export const NoteEditorSchema = z.object({
 	id: z.string().optional(),
@@ -23,7 +23,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: NoteEditorSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -139,22 +138,7 @@ export function NoteEditor({
 					<Icon name="reset" className="scale-125 max-md:scale-150 md:mr-2" />
 					<span className="max-md:hidden">Reset</span>
 				</Button>
-				<StatusButton
-					status={
-						noteEditorFetcher.state === 'submitting'
-							? 'pending'
-							: noteEditorFetcher.data?.status ?? 'idle'
-					}
-					type="submit"
-					disabled={noteEditorFetcher.state !== 'idle'}
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon
-						name="arrow-right"
-						className="scale-125 max-md:scale-150 md:mr-2"
-					/>
-					<span className="max-md:hidden">Submit</span>
-				</StatusButton>
+				<SubmitButton fetcher={noteEditorFetcher} />
 			</div>
 		</noteEditorFetcher.Form>
 	)
