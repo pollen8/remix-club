@@ -68,8 +68,8 @@ export async function action({ request, params }: DataFunctionArgs) {
 	}
 	let team
 
-	const { name, id, clubId, seasonId, teamType } = submission.value
-
+	const { name, id, clubId, seasonId, teamType, members } = submission.value
+	console.log('member', members)
 	// @TODO connect to search
 	const data = {
 		name,
@@ -84,7 +84,15 @@ export async function action({ request, params }: DataFunctionArgs) {
 				id: seasonId,
 			},
 		},
+		members: {
+			connect: members.map(member => {
+				return {
+					id: member,
+				}
+			}),
+		},
 	}
+	console.log('data', data)
 
 	const select = {
 		id: true,

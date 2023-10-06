@@ -150,6 +150,7 @@ model Member {
   clubs        Club[]
   attendance   MemberAttendance[]
   matches      PlayerMatches[]
+  teams        Team[]
 }
 
 
@@ -200,6 +201,7 @@ model Team {
   teamMatch       Match[]         @relation(name: "Match")
   oppositionMatch Match[]         @relation(name: "OppositionMatch")
   players         PlayerMatches[]
+  members         Member[]
 }
 
 model Match {
