@@ -11,6 +11,6 @@ export async function loader({ request, params }: DataFunctionArgs) {
 }
 
 export default function NewSeasonRoute() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader>() as {id: string}
 	return <SeasonEditor clubId={data.id} />
 }

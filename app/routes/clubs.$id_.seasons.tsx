@@ -16,6 +16,7 @@ import { TableTitle } from '~/components/TableTitle.tsx'
 import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { Th, Table, Td } from '~/components/Table.tsx'
 import { PageContainer } from '~/components/PageContainer.tsx'
+import {ButtonGroup} from '~/components/ButtonGroup.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club seasons loader')
@@ -55,16 +56,22 @@ export default function ClubsSeasonsIndexRoute() {
 				<thead>
 					<tr>
 						<Th>Name</Th>
-						<Th>Id</Th>
-						<Th></Th>
+						<Th>Start</Th>
+						<Th>End</Th>
+						<Th />
 					</tr>
 				</thead>
 				<tbody>
 					{data.seasons.map(season => (
 						<tr key={season.id}>
 							<Td>{season.name}</Td>
-							<Td>{season.id}</Td>
+							<Td>{season.start}</Td>
+							<Td>{season.end}</Td>
 							<Td className="w-1">
+							<ButtonGroup>
+									<ButtonLink size="sm" variant="ghost" to={`${season.id}/edit`}>
+										<Icon name="pencil-1" />
+									</ButtonLink>
 								<DeleteButton
 									schema={DeleteFormSchema}
 									intent="delete-season"
@@ -73,6 +80,7 @@ export default function ClubsSeasonsIndexRoute() {
 									id={season.id}
 									clubId={data.clubId ?? ''}
 								/>
+								</ButtonGroup>
 							</Td>
 						</tr>
 					))}
@@ -90,12 +98,11 @@ const DeleteFormSchema = z.object({
 })
 
 export async function action({ request }: DataFunctionArgs) {
-	const userId = await requireUserId(request)
+	await requireUserId(request)
 	const formData = await request.formData()
 
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 
 	if (!submission.value || submission.intent !== 'submit') {

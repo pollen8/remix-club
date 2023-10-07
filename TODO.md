@@ -15,7 +15,6 @@ If only one club assigned to user, on login show that club page
 
 ## Seasons
 
-- Crud seasons -
 - only admin can modify
 - Only one season can be active
 
@@ -36,3 +35,7 @@ DONE:
 - list members - these aren't users (but users can be members)
 - add member
 - delete member
+
+## Seasons
+
+- Crud seasons

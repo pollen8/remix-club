@@ -1,4 +1,4 @@
-import { conform, useForm } from '@conform-to/react'
+import { FieldConfig, conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher, useNavigate } from '@remix-run/react'
@@ -13,6 +13,7 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { addYears } from 'date-fns'
 import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
+import {Season} from '@prisma/client'
 
 export const SeasonEditorSchema = z.object({
 	id: z.string().optional(),
@@ -23,13 +24,12 @@ export const SeasonEditorSchema = z.object({
 })
 
 export async function action({ request }: DataFunctionArgs) {
-	const userId = await requireUserId(request)
+	await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: SeasonEditorSchema,
-		acceptMultipleErrors: () => true,
 	})
-
+console.log('submission', submission);
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
 	}
@@ -83,21 +83,27 @@ export async function action({ request }: DataFunctionArgs) {
 	})
 }
 
+const formatDate = (input: FieldConfig<string>) => {
+	return  input.defaultValue 
+	? new Date(input.defaultValue).toLocaleDateString('en-CA')
+	: new Date().toLocaleDateString('en-CA')
+}
 export function SeasonEditor({
 	clubId,
 	season,
 }: {
 	clubId: string
-	season?: { id: string; name: string; start: string; end: string }
+	season?:Season
 }) {
 	const navigate = useNavigate()
-
+console.log('season', season);
 	const seasonEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
 		id: 'season-editor',
 		constraint: getFieldsetConstraint(SeasonEditorSchema),
 		lastSubmission: seasonEditorFetcher.data?.submission,
 		onValidate({ formData }) {
+			console.log('validate', parse(formData, { schema: SeasonEditorSchema }));
 			return parse(formData, { schema: SeasonEditorSchema })
 		},
 		defaultValue: {
@@ -111,7 +117,7 @@ export function SeasonEditor({
 	return (
 		<Dialog>
 			<DialogHeader>
-				{season?.id ? 'Edit season....' : 'Add season'}
+				{season?.id ? 'Edit season' : 'Add season'}
 			</DialogHeader>
 
 			<seasonEditorFetcher.Form
@@ -135,6 +141,7 @@ export function SeasonEditor({
 					inputProps={{
 						type: 'date',
 						...conform.input(fields.start),
+						defaultValue: formatDate(fields.start),
 					}}
 					errors={fields.name.errors}
 					className="flex flex-col gap-y-2"
@@ -144,6 +151,7 @@ export function SeasonEditor({
 					inputProps={{
 						type: 'date',
 						...conform.input(fields.end),
+						defaultValue: formatDate(fields.end),
 					}}
 					errors={fields.name.errors}
 					className="flex flex-col gap-y-2"
