@@ -4,21 +4,21 @@ import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher, useNavigate } from '@remix-run/react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
-import { Icon } from '~/components/ui/icon.tsx'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { Dialog } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
 import { SubmitButton } from '~/components/SubmitButton.tsx'
+import { Club, Sport } from '@prisma/client'
+import { SelectField } from '~/components/SelectField.tsx'
 
 export const ClubEditorSchema = z.object({
 	id: z.string().optional(),
 	name: z.string().min(1),
 	description: z.string().optional(),
+	sportId: z.string(),
 })
 
 export async function action({ request }: DataFunctionArgs) {
@@ -41,23 +41,24 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 	let club: { id: string }
 
-	const { name, description, id } = submission.value
+	const { name, description, id, sportId } = submission.value
 
 	const data = {
 		createdById: userId,
 		name,
 		description: description ?? '',
+		sportId,
 	}
 
 	const select = {
 		id: true,
 	}
 	if (id) {
-		const existingNote = await prisma.club.findFirst({
+		const existingClub = await prisma.club.findFirst({
 			where: { id, createdById: userId },
 			select: { id: true },
 		})
-		if (!existingNote) {
+		if (!existingClub) {
 			return json(
 				{
 					status: 'error',
@@ -79,11 +80,7 @@ export async function action({ request }: DataFunctionArgs) {
 	})
 }
 
-export function ClubEditor({
-	club,
-}: {
-	club?: { id: string; name: string; description: string }
-}) {
+export function ClubEditor({ club, sports }: { sports: Sport[]; club?: Club }) {
 	const navigate = useNavigate()
 	const clubEditorFetcher = useFetcher<typeof action>()
 
@@ -128,6 +125,11 @@ export function ClubEditor({
 					}}
 					errors={fields.description.errors}
 					className="flex flex-1 flex-col gap-y-2"
+				/>
+				<SelectField
+					options={sports.map(sport => ({ id: sport.id, name: sport.name }))}
+					placeHolder="Sport"
+					field={fields.sportId}
 				/>
 				<ErrorList errors={form.errors} id={form.errorId} />
 				<FormActions>

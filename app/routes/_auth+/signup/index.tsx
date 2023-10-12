@@ -17,6 +17,7 @@ import { getDomainUrl, useIsSubmitting } from '~/utils/misc.ts'
 import { generateTOTP } from '~/utils/totp.server.ts'
 import { emailSchema } from '~/utils/user-validation.ts'
 import { SignupEmail } from './email.server.tsx'
+import { SelectField } from '~/components/SelectField.tsx'
 
 export const onboardingOTPQueryParam = 'code'
 export const onboardingEmailQueryParam = 'email'
@@ -24,6 +25,9 @@ export const verificationType = 'onboarding'
 
 const signupSchema = z.object({
 	email: emailSchema,
+	firstName: z.string(),
+	lastName: z.string(),
+	gender: z.enum(['male', 'female', 'other']),
 })
 
 export async function action({ request }: DataFunctionArgs) {
@@ -43,7 +47,6 @@ export async function action({ request }: DataFunctionArgs) {
 				return
 			}
 		}),
-		acceptMultipleErrors: () => true,
 		async: true,
 	})
 	if (submission.intent !== 'submit') {
@@ -90,7 +93,7 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const response = await sendEmail({
 		to: email,
-		subject: `Welcome to Epic Notes!`,
+		subject: `Welcome to Remix Club!`,
 		react: <SignupEmail onboardingUrl={onboardingUrl.toString()} otp={otp} />,
 	})
 
@@ -109,7 +112,7 @@ export async function action({ request }: DataFunctionArgs) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Sign Up | Epic Notes' }]
+	return [{ title: 'Sign Up | Remix Club' }]
 }
 
 export default function SignupRoute() {
@@ -127,18 +130,30 @@ export default function SignupRoute() {
 	})
 
 	return (
-		<div className="container flex flex-col justify-center pb-32 pt-20">
+		<div className="container mt-4 flex w-[35rem] flex-col justify-center rounded-lg bg-grey-400 pb-32 pt-20">
 			<div className="text-center">
 				<h1 className="text-h1">Let's start your journey!</h1>
 				<p className="mt-3 text-body-md text-muted-foreground">
-					Please enter your email.
+					Please enter your details.
 				</p>
 			</div>
-			<Form
-				method="POST"
-				className="mx-auto mt-16 min-w-[368px] max-w-sm"
-				{...form.props}
-			>
+			<Form method="POST" {...form.props}>
+				<Field
+					labelProps={{
+						htmlFor: fields.firstName.id,
+						children: 'First Name',
+					}}
+					inputProps={{ ...conform.input(fields.firstName), autoFocus: true }}
+					errors={fields.firstName.errors}
+				/>
+				<Field
+					labelProps={{
+						htmlFor: fields.lastName.id,
+						children: 'Last Name',
+					}}
+					inputProps={{ ...conform.input(fields.lastName), autoFocus: true }}
+					errors={fields.lastName.errors}
+				/>
 				<Field
 					labelProps={{
 						htmlFor: fields.email.id,
@@ -146,6 +161,11 @@ export default function SignupRoute() {
 					}}
 					inputProps={{ ...conform.input(fields.email), autoFocus: true }}
 					errors={fields.email.errors}
+				/>
+				<SelectField
+					options={['male', 'female', 'other']}
+					placeHolder="Gender"
+					field={fields.gender}
 				/>
 				<ErrorList errors={form.errors} id={form.errorId} />
 				<StatusButton

@@ -100,7 +100,6 @@ export async function action({ request }: DataFunctionArgs) {
 				return
 			}
 		}),
-		acceptMultipleErrors: () => true,
 		async: true,
 	})
 	if (submission.intent !== 'submit') {

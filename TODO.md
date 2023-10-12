@@ -24,6 +24,12 @@ If only one club assigned to user, on login show that club page
 - Add members / guests to attendance
 - mark if guest paid or not
 
+## Teams
+
+## Matches
+
+- Crud matches
+
 =================================================
 
 DONE:
@@ -39,3 +45,7 @@ DONE:
 ## Seasons
 
 - Crud seasons
+
+## Teams
+
+- Crud teams

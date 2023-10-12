@@ -26,7 +26,6 @@ export async function action({ request, params }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: MemberEditorSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -111,68 +110,64 @@ export function MemberEditor({
 
 	return (
 		<>
-			<Dialog>
-				<DialogHeader>Add/Edit member</DialogHeader>
-				<memberEditorFetcher.Form
-					method="post"
-					action="/resources/member-editor"
-					{...form.props}
-				>
-					<input name="clubId" type="hidden" value={clubId} />
-					<input name="id" type="hidden" value={member?.id} />
-					<Field
-						labelProps={{ children: 'Name' }}
-						inputProps={{
-							...conform.input(fields.name),
-							autoFocus: true,
-						}}
-						errors={fields.name.errors}
-						className="flex flex-col gap-y-2"
-					/>
-					<Field
-						labelProps={{ children: 'Email' }}
-						inputProps={{
-							...conform.input(fields.email),
-						}}
-						errors={fields.name.errors}
-						className="flex flex-col gap-y-2"
-					/>
-					<Field
-						labelProps={{ children: 'Mobile' }}
-						inputProps={{
-							...conform.input(fields.mobile),
-						}}
-						errors={fields.name.errors}
-						className="flex flex-col gap-y-2"
-					/>
-					<ErrorList errors={form.errors} id={form.errorId} />
-					<FormActions>
-						<Button
-							variant="outline"
-							type="button"
-							onClick={() => navigate(-1)}
-						>
-							Cancel
-						</Button>
-						<StatusButton
-							status={
-								memberEditorFetcher.state === 'submitting'
-									? 'pending'
-									: memberEditorFetcher.data?.status ?? 'idle'
-							}
-							type="submit"
-							disabled={memberEditorFetcher.state !== 'idle'}
-							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-						>
-							<Icon
-								name="arrow-right"
-								className="scale-125 max-md:scale-150 md:mr-2"
-							/>
-							<span className="max-md:hidden">Submit</span>
-						</StatusButton>
-					</FormActions>
-				</memberEditorFetcher.Form>
-			</Dialog>
+			{/* <Dialog> */}
+			{/* <DialogHeader>Add/Edit member</DialogHeader> */}
+			<memberEditorFetcher.Form
+				method="post"
+				action="/resources/member-editor"
+				{...form.props}
+			>
+				<input name="clubId" type="hidden" value={clubId} />
+				<input name="id" type="hidden" value={member?.id} />
+				<Field
+					labelProps={{ children: 'Name' }}
+					inputProps={{
+						...conform.input(fields.name),
+						autoFocus: true,
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<Field
+					labelProps={{ children: 'Email' }}
+					inputProps={{
+						...conform.input(fields.email),
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<Field
+					labelProps={{ children: 'Mobile' }}
+					inputProps={{
+						...conform.input(fields.mobile),
+					}}
+					errors={fields.name.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<ErrorList errors={form.errors} id={form.errorId} />
+				<FormActions>
+					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
+						Cancel
+					</Button>
+					<StatusButton
+						status={
+							memberEditorFetcher.state === 'submitting'
+								? 'pending'
+								: memberEditorFetcher.data?.status ?? 'idle'
+						}
+						type="submit"
+						disabled={memberEditorFetcher.state !== 'idle'}
+						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+					>
+						<Icon
+							name="arrow-right"
+							className="scale-125 max-md:scale-150 md:mr-2"
+						/>
+						<span className="max-md:hidden">Submit</span>
+					</StatusButton>
+				</FormActions>
+			</memberEditorFetcher.Form>
+			{/* </Dialog> */}
 		</>
 	)
 }

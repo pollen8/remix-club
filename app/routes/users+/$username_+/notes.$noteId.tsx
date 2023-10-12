@@ -12,7 +12,6 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { ErrorList } from '~/components/forms.tsx'
 import { Button } from '~/components/ui/button.tsx'
 import { Icon } from '~/components/ui/icon.tsx'
@@ -59,7 +58,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (!submission.value || submission.intent !== 'submit') {
 		return json(
@@ -111,7 +109,7 @@ export default function NoteRoute() {
 				</div>
 			</div>
 			{data.isOwner ? (
-				<div className={floatingToolbarClassName}>
+				<div>
 					<span
 						className="text-sm text-foreground/90 max-[524px]:hidden"
 						title={data.dateDisplay}

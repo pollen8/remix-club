@@ -9,7 +9,6 @@ import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { SubmitButton } from '~/components/SubmitButton.tsx'
 
 export const NoteEditorSchema = z.object({
@@ -129,7 +128,7 @@ export function NoteEditor({
 				className="flex flex-1 flex-col gap-y-2"
 			/>
 			<ErrorList errors={form.errors} id={form.errorId} />
-			<div className={floatingToolbarClassName}>
+			<div>
 				<Button
 					variant="destructive"
 					type="reset"

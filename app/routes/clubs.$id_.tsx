@@ -15,14 +15,11 @@ import { formatDistanceToNow } from 'date-fns'
 import { z } from 'zod'
 import { PageContainer } from '~/components/PageContainer.tsx'
 import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 import { ErrorList } from '~/components/forms.tsx'
 import { Button } from '~/components/ui/button.tsx'
 import { Icon } from '~/components/ui/icon.tsx'
 import {
 	Menubar,
-	MenubarContent,
-	MenubarItem,
 	MenubarMenu,
 	MenubarTrigger,
 } from '~/components/ui/menubar.tsx'
@@ -154,9 +151,21 @@ export default function ClubRoute() {
 							<Icon name="calendar-month">Teams</Icon>
 						</Link>
 					</MenubarTrigger>
+					<MenubarTrigger className="cursor-pointer" asChild>
+						<Link to="matches">
+							<Icon name="person">Matches</Icon>
+						</Link>
+					</MenubarTrigger>
+					<MenubarTrigger className="cursor-pointer" asChild>
+						<Link to="membershipTypes">
+							<Icon name="person">Membership Types</Icon>
+						</Link>
+					</MenubarTrigger>
 				</MenubarMenu>
 			</Menubar>
-			<Outlet />
+			<div className="mt-10">
+				<Outlet />
+			</div>
 		</PageContainer>
 	)
 }

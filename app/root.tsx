@@ -50,7 +50,6 @@ import { makeTimings, time } from './utils/timing.server.ts'
 import { useOptionalUser, useUser } from './utils/user.ts'
 import { useToast } from './utils/useToast.tsx'
 
-
 export const links: LinksFunction = () => {
 	return [
 		// Preload svg sprite as a resource to avoid render blocking
@@ -80,7 +79,7 @@ export const links: LinksFunction = () => {
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data ? 'Team8' : 'Error | Team8' },
+		{ title: data ? 'Remix CLub' : 'Error | Remix CLub' },
 		{ name: 'description', content: `Your own captain's log` },
 	]
 }
@@ -189,14 +188,20 @@ function App() {
 	return (
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
 			<div className="bd grid h-screen grid-rows-[50px_1fr_50px] border-solid">
-				<header className="border">
+				<header className="flex justify-end border">
 					{user ? (
 						<UserDropdown />
 					) : (
-						<Button asChild variant="default" size="sm">
-							<Link to="/login">Log In</Link>
-						</Button>
+						<>
+							<Button asChild variant="ghost" size="sm">
+								<Link to="/signup">Sign up</Link>
+							</Button>
+							<Button asChild variant="default" size="sm">
+								<Link to="/login">Log In</Link>
+							</Button>
+						</>
 					)}
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 				</header>
 				<main className="h-full">
 					<Outlet />
@@ -230,9 +235,8 @@ function App() {
 						<div className="font-light">epic</div>
 						<div className="font-bold">notes</div>
 					</Link>
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
-			</div> */}
+					</div>
+				</div> */}
 			<Toaster />
 		</Document>
 	)
@@ -273,13 +277,7 @@ function UserDropdown() {
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}/notes`}>
-							<Icon className="text-body-md" name="pencil-2">
-								Notes
-							</Icon>
-						</Link>
-					</DropdownMenuItem>
+
 					<DropdownMenuItem asChild>
 						<Link prefetch="intent" to={`/clubs`}>
 							<Icon className="text-body-md" name="pencil-2">

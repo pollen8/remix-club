@@ -30,7 +30,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: loginFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -122,71 +121,66 @@ export function InlineLogin({
 
 	return (
 		<div>
-			<div className="mx-auto w-full max-w-md px-8">
-				<loginFetcher.Form
-					method="POST"
-					action={ROUTE_PATH}
-					name="login"
-					{...form.props}
-				>
-					<Field
-						labelProps={{ children: 'Username' }}
-						inputProps={{
-							...conform.input(fields.username),
-							autoFocus: true,
-							className: 'lowercase',
+			<loginFetcher.Form
+				method="POST"
+				action={ROUTE_PATH}
+				name="login"
+				{...form.props}
+			>
+				<Field
+					labelProps={{ children: 'Username' }}
+					inputProps={{
+						...conform.input(fields.username),
+						autoFocus: true,
+						className: 'lowercase',
+					}}
+					errors={fields.username.errors}
+				/>
+
+				<Field
+					labelProps={{ children: 'Password' }}
+					inputProps={conform.input(fields.password, { type: 'password' })}
+					errors={fields.password.errors}
+				/>
+
+				<div className="flex justify-between">
+					<CheckboxField
+						labelProps={{
+							htmlFor: fields.remember.id,
+							children: 'Remember me',
 						}}
-						errors={fields.username.errors}
+						buttonProps={conform.input(fields.remember, { type: 'checkbox' })}
+						errors={fields.remember.errors}
 					/>
 
-					<Field
-						labelProps={{ children: 'Password' }}
-						inputProps={conform.input(fields.password, { type: 'password' })}
-						errors={fields.password.errors}
-					/>
-
-					<div className="flex justify-between">
-						<CheckboxField
-							labelProps={{
-								htmlFor: fields.remember.id,
-								children: 'Remember me',
-							}}
-							buttonProps={conform.input(fields.remember, { type: 'checkbox' })}
-							errors={fields.remember.errors}
-						/>
-
-						<div>
-							<Link
-								to="/forgot-password"
-								className="text-body-xs font-semibold"
-							>
-								Forgot password?
-							</Link>
-						</div>
+					<div>
+						<Link to="/forgot-password" className="text-body-xs font-semibold">
+							Forgot password?
+						</Link>
 					</div>
-
-					<input {...conform.input(fields.redirectTo)} type="hidden" />
-					<ErrorList errors={[...form.errors, formError]} id={form.errorId} />
-
-					<div className="flex items-center justify-between gap-6 pt-3">
-						<StatusButton
-							className="w-full"
-							status={
-								loginFetcher.state === 'submitting'
-									? 'pending'
-									: loginFetcher.data?.status ?? 'idle'
-							}
-							type="submit"
-							disabled={loginFetcher.state !== 'idle'}
-						>
-							Log in
-						</StatusButton>
-					</div>
-				</loginFetcher.Form>
-				<div className="flex items-center justify-center gap-2 pt-6">
-					<span className="text-muted-foreground">New here?</span>
-					<Link to="/signup">Create an account</Link>
 				</div>
+
+				<input {...conform.input(fields.redirectTo)} type="hidden" />
+				<ErrorList errors={[...form.errors, formError]} id={form.errorId} />
+
+				<div className="flex items-center justify-between gap-6 pt-3">
+					<StatusButton
+						className="w-full"
+						status={
+							loginFetcher.state === 'submitting'
+								? 'pending'
+								: loginFetcher.data?.status ?? 'idle'
+						}
+						type="submit"
+						disabled={loginFetcher.state !== 'idle'}
+					>
+						Log in
+					</StatusButton>
+				</div>
+			</loginFetcher.Form>
+			<div className="flex items-center justify-center gap-2 pt-6">
+				<span className="text-muted-foreground">New here?</span>
+				<Link to="/signup">Create an account</Link>
 			</div>
 		</div>
 	)

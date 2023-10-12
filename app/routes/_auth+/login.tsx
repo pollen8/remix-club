@@ -30,7 +30,7 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Login to Epic Notes' }]
+	return [{ title: 'Login to Remix VClub' }]
 }
 
 export default function LoginPage() {
@@ -40,7 +40,7 @@ export default function LoginPage() {
 	const redirectTo = searchParams.get('redirectTo') || '/clubs'
 
 	return (
-		<div className="flex min-h-full flex-col justify-center pb-32 pt-20">
+		<div className="container mt-4 flex w-[35rem] flex-col justify-center rounded-lg bg-grey-400 pb-32 pt-20">
 			<div className="mx-auto w-full max-w-md">
 				<div className="flex flex-col gap-3 text-center">
 					<h1 className="text-h1">Welcome back!</h1>

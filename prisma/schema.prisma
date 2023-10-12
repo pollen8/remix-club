@@ -66,7 +66,7 @@ model User {
   notes        Note[]
   roles        Role[]
   session      Session[]
-  createdClubs Club[]           @relation(name: "CreatedClubs")
+  createdClubs Club[]    @relation(name: "CreatedClubs")
 }
 
 model Password {
@@ -128,55 +128,81 @@ model Note {
 }
 
 model Club {
-  id          String           @id @unique @default(cuid())
-  name        String
-  description String
-  createdBy   User             @relation(fields: [createdById], references: [id], name: "CreatedClubs")
-  createdById String
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  users       Member[]
-  seasons     Season[]
-  attandance  MemberAttendance[]
-  teams       Team[]
+  id              String                @id @unique @default(cuid())
+  name            String
+  description     String
+  createdBy       User                  @relation(fields: [createdById], references: [id], name: "CreatedClubs")
+  createdById     String
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  users           Member[]
+  seasons         Season[]
+  attandance      MemberAttendance[]
+  teams           Team[]
+  matches         Match[]
+  membershipTypes ClubMembershipTypes[]
+  sport           Sport                 @relation(fields: [sportId], references: [id])
+  sportId         String
 }
-
 
 model Member {
-  id String @id @unique @default(cuid())
-  name String
-  email String
-  mobile String
-  clubs        Club[]
-  attendance   MemberAttendance[]
-  matches      PlayerMatches[]
-  teams        Team[]
+  id                   String              @id @unique @default(cuid())
+  firstName            String
+  lastName             String
+  gender               String
+  address              String
+  emergencyContactName String
+  email                String
+  mobile               String
+  club                 ClubMembershipTypes @relation(fields: [membershipTypeId], references: [id])
+  membershipTypeId     String
+  affiliationNumber    String
+  // beNumber
+  //  : no, player, compete, coaching, dont know
+  preferredTeams       Team[]              @relation(name: "PreferredTeam")
+  clubs                Club[]
+  attendance           MemberAttendance[]
+  matches              PlayerMatches[]
+  teams                Team[]              @relation(name: "TeamMember")
 }
 
+model ClubMembershipTypes {
+  id     String   @id @unique @default(cuid())
+  club   Club     @relation(fields: [clubId], references: [id])
+  clubId String
+  title  String
+  cost   Int
+  Member Member[]
+}
 
-// model MemberClubs {
-//   member   Member   @relation(fields: [memberId], references: [id])
-//   memberId String
-//   club   Club   @relation(fields: [clubId], references: [id])
-//   clubId String
+model SportsBodyMembershipTypes {
+  id String @id @unique @default(cuid())
 
-//   @@id([memberId, clubId])
-// }
+  sport   Sport  @relation(fields: [sportId], references: [id])
+  sportId String
+}
+
+model Sport {
+  id                        String                      @id @unique @default(cuid())
+  name                      String
+  SportsBodyMembershipTypes SportsBodyMembershipTypes[]
+  Club                      Club[]
+}
 
 model Season {
-  id         String           @id @unique @default(cuid())
+  id         String             @id @unique @default(cuid())
   name       String
   start      DateTime
   end        DateTime
-  club       Club             @relation(fields: [clubId], references: [id])
+  club       Club               @relation(fields: [clubId], references: [id])
   clubId     String
   attendance MemberAttendance[]
   teams      Team[]
 }
 
 model MemberAttendance {
-  member         Member     @relation(fields: [memberId], references: [id])
-  memberId         String
+  member         Member   @relation(fields: [memberId], references: [id])
+  memberId       String
   club           Club     @relation(fields: [clubId], references: [id])
   clubId         String
   season         Season   @relation(fields: [seasonId], references: [id])
@@ -187,8 +213,6 @@ model MemberAttendance {
 
   @@id([memberId, clubId, seasonId])
 }
-
-
 
 model Team {
   id              String          @id @unique @default(cuid())
@@ -201,7 +225,8 @@ model Team {
   teamMatch       Match[]         @relation(name: "Match")
   oppositionMatch Match[]         @relation(name: "OppositionMatch")
   players         PlayerMatches[]
-  members         Member[]
+  members         Member[]        @relation(name: "TeamMember")
+  possibleMembers Member[]        @relation(name: "PreferredTeam")
 }
 
 model Match {
@@ -211,10 +236,12 @@ model Match {
   oppositionTeam   Team            @relation(fields: [oppositionTeamId], references: [id], name: "OppositionMatch")
   oppositionTeamId String
   players          PlayerMatches[]
+  club             Club            @relation(fields: [clubId], references: [id])
+  clubId           String
 }
 
 model PlayerMatches {
-  player   Member   @relation(fields: [playerId], references: [id])
+  player   Member @relation(fields: [playerId], references: [id])
   playerId String
   match    Match  @relation(fields: [matchId], references: [id])
   matchId  String

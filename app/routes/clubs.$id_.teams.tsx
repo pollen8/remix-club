@@ -104,7 +104,6 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 
 	if (!submission.value || submission.intent !== 'submit') {

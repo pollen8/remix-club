@@ -72,11 +72,11 @@ export default function UsernameRoute() {
 					<div className="mt-10 flex gap-4">
 						{isLoggedInUser ? (
 							<>
-								<Button asChild>
-									<Link to="notes" prefetch="intent">
-										My notes
+								{/* <Button asChild>
+									<Link to="clubs" prefetch="intent">
+										My clubs
 									</Link>
-								</Button>
+								</Button> */}
 								<Button asChild>
 									<Link to="/settings/profile" prefetch="intent">
 										Edit profile
@@ -84,11 +84,12 @@ export default function UsernameRoute() {
 								</Button>
 							</>
 						) : (
-							<Button asChild>
-								<Link to="notes" prefetch="intent">
-									{userDisplayName}'s notes
-								</Link>
-							</Button>
+							<div />
+							// <Button asChild>
+							// 	<Link to="clubs" prefetch="intent">
+							// 		{userDisplayName}'s clubs
+							// 	</Link>
+							// </Button>
 						)}
 					</div>
 				</div>
@@ -112,10 +113,10 @@ export function ErrorBoundary() {
 export const meta: V2_MetaFunction<typeof loader> = ({ data, params }) => {
 	const displayName = data?.user.name ?? params.username
 	return [
-		{ title: `${displayName} | Epic Notes` },
+		{ title: `${displayName} | Remix Club` },
 		{
 			name: 'description',
-			content: `Profile of ${displayName} on Epic Notes`,
+			content: `Profile of ${displayName} on Remix Club`,
 		},
 	]
 }

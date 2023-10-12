@@ -60,7 +60,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: resetPasswordSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -89,7 +88,7 @@ export async function action({ request }: DataFunctionArgs) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Reset Password | Epic Notes' }]
+	return [{ title: 'Reset Password | Remix Club' }]
 }
 
 export default function ResetPasswordPage() {

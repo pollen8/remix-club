@@ -82,7 +82,6 @@ async function validate(request: Request, body: URLSearchParams | FormData) {
 					return
 				}
 			}),
-		acceptMultipleErrors: () => true,
 		async: true,
 	})
 	if (submission.intent !== 'submit') {

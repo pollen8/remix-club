@@ -89,7 +89,6 @@ async function validate(request: Request, body: FormData | URLSearchParams) {
 					return
 				}
 			}),
-		acceptMultipleErrors: () => true,
 		async: true,
 	})
 
@@ -127,7 +126,7 @@ async function validate(request: Request, body: FormData | URLSearchParams) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Verify Password Recovery for Epic Notes' }]
+	return [{ title: 'Verify Password Recovery for Remix Club' }]
 }
 
 export default function ForgotPasswordVerifyRoute() {

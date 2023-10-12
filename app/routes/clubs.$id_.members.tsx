@@ -104,7 +104,6 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const submission = parse(formData, {
 		schema: DeleteFormSchema,
-		acceptMultipleErrors: () => true,
 	})
 
 	if (!submission.value || submission.intent !== 'submit') {
@@ -118,7 +117,7 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 	const { clubId, id } = submission.value
 
-	const member = await prisma.member.findFirst({
+	const member = await prisma.clubMembershipTypes.findFirst({
 		select: { id: true },
 		where: {
 			id: id,
@@ -126,18 +125,18 @@ export async function action({ request }: DataFunctionArgs) {
 	})
 
 	if (!member) {
-		submission.error.id = ['Member not found']
+		submission.error.id = ['Membership type not found']
 		return json({ status: 'error', submission } as const, {
 			status: 404,
 		})
 	}
 
-	await prisma.member.delete({
+	await prisma.clubMembershipTypes.delete({
 		where: { id: member.id },
 	})
 
-	return redirectWithToast(`/clubs/${clubId}/members`, {
-		title: 'Member removed',
+	return redirectWithToast(`/clubs/${clubId}/membershipTypes`, {
+		title: 'Membership type removed',
 		variant: 'destructive',
 	})
 }

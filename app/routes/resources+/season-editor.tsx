@@ -14,6 +14,7 @@ import { addYears } from 'date-fns'
 import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
 import {Season} from '@prisma/client'
+import {formatDate} from '~/utils/date.ts'
 
 export const SeasonEditorSchema = z.object({
 	id: z.string().optional(),
@@ -83,11 +84,7 @@ console.log('submission', submission);
 	})
 }
 
-const formatDate = (input: FieldConfig<string>) => {
-	return  input.defaultValue 
-	? new Date(input.defaultValue).toLocaleDateString('en-CA')
-	: new Date().toLocaleDateString('en-CA')
-}
+
 export function SeasonEditor({
 	clubId,
 	season,

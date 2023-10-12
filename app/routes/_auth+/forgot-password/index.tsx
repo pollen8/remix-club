@@ -30,7 +30,6 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: forgotPasswordSchema,
-		acceptMultipleErrors: () => true,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -95,7 +94,7 @@ export async function action({ request }: DataFunctionArgs) {
 
 		await sendEmail({
 			to: user.email,
-			subject: `Epic Notes Password Reset`,
+			subject: `Remix Club Password Reset`,
 			react: (
 				<ForgotPasswordEmail
 					onboardingUrl={resetPasswordUrl.toString()}
@@ -109,7 +108,7 @@ export async function action({ request }: DataFunctionArgs) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Password Recovery for Epic Notes' }]
+	return [{ title: 'Password Recovery for Remix Club' }]
 }
 
 export default function ForgotPasswordRoute() {
