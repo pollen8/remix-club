@@ -5,12 +5,12 @@ import {
 	useNavigation,
 } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { useForm } from '@conform-to/react'
 import { StatusButton } from '~/components/ui/status-button.tsx'
 import { ErrorList } from '~/components/forms.tsx'
-import { ButtonProps } from './button.tsx'
+import type { ButtonProps } from './button.tsx'
 
 type Props = {
 	id: string

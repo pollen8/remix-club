@@ -1,4 +1,4 @@
-import { FieldConfig, conform, useForm } from '@conform-to/react'
+import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher, useNavigate } from '@remix-run/react'
@@ -13,8 +13,8 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { addYears } from 'date-fns'
 import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
-import {Season} from '@prisma/client'
-import {formatDate} from '~/utils/date.ts'
+import type { Season } from '@prisma/client'
+import { formatDate } from '~/utils/date.ts'
 
 export const SeasonEditorSchema = z.object({
 	id: z.string().optional(),
@@ -30,7 +30,7 @@ export async function action({ request }: DataFunctionArgs) {
 	const submission = parse(formData, {
 		schema: SeasonEditorSchema,
 	})
-console.log('submission', submission);
+	console.log('submission', submission)
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
 	}
@@ -43,8 +43,6 @@ console.log('submission', submission);
 			{ status: 400 },
 		)
 	}
-	let season
-
 	const { name, start, end, id, clubId } = submission.value
 
 	const data = {
@@ -71,36 +69,34 @@ console.log('submission', submission);
 				{ status: 404 },
 			)
 		}
-		season = await prisma.season.update({
+		await prisma.season.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		season = await prisma.season.create({ data, select })
+		await prisma.season.create({ data, select })
 	}
 	return redirectWithToast(`/clubs/${clubId}/seasons`, {
 		title: id ? 'Season updated' : 'Season created',
 	})
 }
 
-
 export function SeasonEditor({
 	clubId,
 	season,
 }: {
 	clubId: string
-	season?:Season
+	season?: Season
 }) {
 	const navigate = useNavigate()
-console.log('season', season);
 	const seasonEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
 		id: 'season-editor',
 		constraint: getFieldsetConstraint(SeasonEditorSchema),
 		lastSubmission: seasonEditorFetcher.data?.submission,
 		onValidate({ formData }) {
-			console.log('validate', parse(formData, { schema: SeasonEditorSchema }));
+			console.log('validate', parse(formData, { schema: SeasonEditorSchema }))
 			return parse(formData, { schema: SeasonEditorSchema })
 		},
 		defaultValue: {
@@ -113,9 +109,7 @@ console.log('season', season);
 
 	return (
 		<Dialog>
-			<DialogHeader>
-				{season?.id ? 'Edit season' : 'Add season'}
-			</DialogHeader>
+			<DialogHeader>{season?.id ? 'Edit season' : 'Add season'}</DialogHeader>
 
 			<seasonEditorFetcher.Form
 				method="post"

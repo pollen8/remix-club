@@ -1,11 +1,11 @@
 import { requireUserId } from '~/utils/auth.server.ts'
-import type { Member, Season } from '@prisma/client'
+import type { Season } from '@prisma/client'
 import { json } from '@remix-run/router'
-import { DataFunctionArgs } from '@remix-run/server-runtime'
+import { type DataFunctionArgs } from '@remix-run/server-runtime'
 import { useLoaderData } from '@remix-run/react'
 import { makeTimings, time } from '~/utils/timing.server.ts'
 import { prisma } from '~/utils/db.server.ts'
-import {SeasonEditor} from './resources+/season-editor.tsx'
+import { SeasonEditor } from './resources+/season-editor.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('edit season loader')
@@ -21,7 +21,6 @@ export async function loader({ request, params }: DataFunctionArgs) {
 		{ timings, type: 'edit season season' },
 	)
 
-
 	return json(
 		{ season, id: params.id },
 		{ headers: { 'Server-Timing': timings.toString() } },
@@ -33,10 +32,5 @@ export default function EditSeasonRoute() {
 		id: string
 		season: Season
 	}
-	return (
-		<SeasonEditor
-			clubId={data.id}
-			season={data.season}
-		/>
-	)
+	return <SeasonEditor clubId={data.id} season={data.season} />
 }

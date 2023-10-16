@@ -6,9 +6,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select.tsx'
-import { FieldConfig, conform } from '@conform-to/react'
+import type { FieldConfig } from '@conform-to/react'
+import { conform } from '@conform-to/react'
 import { ErrorList } from './forms.js'
-import { PropsWithRef, useId } from 'react'
+import { useId } from 'react'
 
 const isId = (
 	option: string[] | { id: string; name: string }[],
@@ -21,13 +22,7 @@ type Props = {
 	placeHolder: string
 	width?: string
 }
-export const SelectField = ({
-	options,
-	field,
-	placeHolder,
-	ref,
-	width,
-}: PropsWithRef<Props>) => {
+export const SelectField = ({ options, field, placeHolder, width }: Props) => {
 	const normalOptions = !isId(options)
 		? options.map(o => ({ id: o, name: o }))
 		: options

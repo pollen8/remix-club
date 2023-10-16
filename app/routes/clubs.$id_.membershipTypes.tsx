@@ -22,19 +22,19 @@ import { TableTitle } from '~/components/TableTitle.tsx'
 import { ButtonGroup } from '~/components/ButtonGroup.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
-	const timings = makeTimings('club members loader')
+	const timings = makeTimings('club member types loader')
 
-	const teams = await time(
+	const membershipTypes = await time(
 		() =>
-			prisma.team.findMany({
+			prisma.clubMembershipTypes.findMany({
 				where: {
 					clubId: params.id,
 				},
 			}),
-		{ timings, type: 'find club teams' },
+		{ timings, type: 'find club member types' },
 	)
 	return json(
-		{ teams, clubId: params.id },
+		{ membershipTypes, clubId: params.id },
 		{ headers: { 'Server-Timing': timings.toString() } },
 	)
 }
@@ -50,38 +50,41 @@ export default function ClubsTeamsIndexRoute() {
 	return (
 		<>
 			<TableTitle>
-				<h2 className="text-h2">Teams</h2>
+				<h2 className="text-h2">Membership Types</h2>
 				<ButtonLink to="new">
-					<Icon name="plus">New Team</Icon>
+					<Icon name="plus">New Membership Type</Icon>
 				</ButtonLink>
 			</TableTitle>
 			<Table>
 				<thead>
 					<tr>
 						<Th>Name</Th>
-						<Th>Type</Th>
+						<Th>Cost</Th>
 						<Th></Th>
 					</tr>
 				</thead>
 				<tbody>
-					{/** @TODO  empty data cta */}
-					{data.teams.map(team => (
-						<tr key={team.id}>
-							<Td>{team.name}</Td>
-							<Td>{team.teamType}</Td>
+					{data.membershipTypes.map(membershipType => (
+						<tr key={membershipType.id}>
+							<Td>{membershipType.title}</Td>
+							<Td>{membershipType.cost}</Td>
 							<Td className="w-20">
 								<ButtonGroup>
-									<ButtonLink size="sm" variant="ghost" to={`${team.id}/edit`}>
+									<ButtonLink
+										size="sm"
+										variant="ghost"
+										to={`${membershipType.id}/edit`}
+									>
 										<Icon name="pencil-1" />
 									</ButtonLink>
 									{/*** @TODO replace with modal confirmation */}
 									<DeleteButton
-										id={team.id}
+										id={membershipType.id}
 										size="sm"
 										clubId={data.clubId ?? ''}
 										action={action}
 										schema={DeleteFormSchema}
-										intent="delete-team"
+										intent="delete-membershipType"
 									/>
 								</ButtonGroup>
 							</Td>
@@ -95,7 +98,7 @@ export default function ClubsTeamsIndexRoute() {
 }
 
 const DeleteFormSchema = z.object({
-	intent: z.literal('delete-team'),
+	intent: z.literal('delete-membershipType'),
 	id: z.string(),
 	clubId: z.string(),
 })

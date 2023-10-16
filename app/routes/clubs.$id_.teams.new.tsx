@@ -1,12 +1,12 @@
 import { requireUserId } from '~/utils/auth.server.ts'
 
 import { json } from '@remix-run/router'
-import { DataFunctionArgs } from '@remix-run/server-runtime'
+import { type DataFunctionArgs } from '@remix-run/server-runtime'
 import { TeamEditor } from './resources+/team-editor.tsx'
 import { useLoaderData } from '@remix-run/react'
 import { makeTimings, time } from '~/utils/timing.server.ts'
 import { prisma } from '~/utils/db.server.ts'
-import { Member, Season } from '@prisma/client'
+import type { Member, Season } from '@prisma/client'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('new team loader')

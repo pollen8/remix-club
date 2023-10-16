@@ -1,5 +1,9 @@
-import { DataFunctionArgs, HeadersFunction, json } from '@remix-run/node'
-import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import {
+	type DataFunctionArgs,
+	type HeadersFunction,
+	json,
+} from '@remix-run/node'
+import { Outlet, useLoaderData } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'
 import {
 	combineServerTimings,
@@ -15,7 +19,6 @@ import { DeleteButton } from '~/components/ui/deleteButton.tsx'
 import { Table, Td, Th } from '~/components/Table.tsx'
 import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { TableTitle } from '~/components/TableTitle.tsx'
-import { PageContainer } from '~/components/PageContainer.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club members loader')
@@ -70,7 +73,7 @@ export default function ClubsMembersIndexRoute() {
 					{/** @TODO  empty data cta */}
 					{data.members.map(member => (
 						<tr key={member.id}>
-							<Td>{member.name}</Td>
+							<Td>{member.firstName + ' ' + member.lastName}</Td>
 							<Td>{member.id}</Td>
 							<Td className="w-1">
 								{/*** @TODO replace with modal confirmation */}
@@ -99,7 +102,7 @@ const DeleteFormSchema = z.object({
 })
 
 export async function action({ request }: DataFunctionArgs) {
-	const userId = await requireUserId(request)
+	await requireUserId(request)
 	const formData = await request.formData()
 
 	const submission = parse(formData, {

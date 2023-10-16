@@ -1,4 +1,8 @@
-import { DataFunctionArgs, HeadersFunction, json } from '@remix-run/node'
+import {
+	type DataFunctionArgs,
+	type HeadersFunction,
+	json,
+} from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'
 import {
@@ -15,8 +19,7 @@ import { DeleteButton } from '~/components/ui/deleteButton.tsx'
 import { TableTitle } from '~/components/TableTitle.tsx'
 import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { Th, Table, Td } from '~/components/Table.tsx'
-import { PageContainer } from '~/components/PageContainer.tsx'
-import {ButtonGroup} from '~/components/ButtonGroup.tsx'
+import { ButtonGroup } from '~/components/ButtonGroup.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const timings = makeTimings('club seasons loader')
@@ -68,18 +71,22 @@ export default function ClubsSeasonsIndexRoute() {
 							<Td>{season.start}</Td>
 							<Td>{season.end}</Td>
 							<Td className="w-1">
-							<ButtonGroup>
-									<ButtonLink size="sm" variant="ghost" to={`${season.id}/edit`}>
+								<ButtonGroup>
+									<ButtonLink
+										size="sm"
+										variant="ghost"
+										to={`${season.id}/edit`}
+									>
 										<Icon name="pencil-1" />
 									</ButtonLink>
-								<DeleteButton
-									schema={DeleteFormSchema}
-									intent="delete-season"
-									size="sm"
-									action={action}
-									id={season.id}
-									clubId={data.clubId ?? ''}
-								/>
+									<DeleteButton
+										schema={DeleteFormSchema}
+										intent="delete-season"
+										size="sm"
+										action={action}
+										id={season.id}
+										clubId={data.clubId ?? ''}
+									/>
 								</ButtonGroup>
 							</Td>
 						</tr>

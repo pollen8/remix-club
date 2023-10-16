@@ -2,11 +2,11 @@ import { useRef } from 'react'
 
 import { cssBundleHref } from '@remix-run/css-bundle'
 import {
-	DataFunctionArgs,
-	HeadersFunction,
+	type DataFunctionArgs,
+	type HeadersFunction,
 	json,
-	LinksFunction,
-	V2_MetaFunction,
+	type LinksFunction,
+	type V2_MetaFunction,
 } from '@remix-run/node'
 import {
 	Form,
@@ -18,13 +18,11 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useMatches,
 	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
 
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
-import { SearchBar } from './components/search-bar.tsx'
 import { Button } from './components/ui/button.tsx'
 import {
 	DropdownMenu,
@@ -181,8 +179,6 @@ function App() {
 	const nonce = useNonce()
 	const user = useOptionalUser()
 	const theme = useTheme()
-	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	useToast(data.flash?.toast)
 
 	return (

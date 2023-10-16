@@ -1,5 +1,5 @@
 import { useNavigate } from '@remix-run/react'
-import { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 import { Button } from './ui/button.tsx'
 import { Icon } from './ui/icon.tsx'
 

@@ -10,21 +10,24 @@ import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
+import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
+import type { Match, Team } from '@prisma/client'
+import { formatDate } from '~/utils/date.ts'
 
-export const MemberEditorSchema = z.object({
+export const MatchEditorSchema = z.object({
 	id: z.string().optional(),
 	clubId: z.string(),
-	name: z.string().min(1),
-	email: z.string().email(),
-	mobile: z.string().optional(),
+	teamId: z.string(),
+	oppositionTeamId: z.string(),
+	startDateTime: z.string().pipe(z.coerce.date()),
 })
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request }: DataFunctionArgs) {
 	await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
-		schema: MemberEditorSchema,
+		schema: MatchEditorSchema,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -38,28 +41,25 @@ export async function action({ request, params }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	const { name, email, mobile, id, clubId } = submission.value
+	const { oppositionTeamId, teamId, startDateTime, id, clubId } =
+		submission.value
 
 	const data = {
-		name,
-		email: email,
-		mobile: mobile ?? '',
-		clubs: {
-			connect: {
-				id: clubId,
-			},
-		},
+		clubId,
+		oppositionTeamId,
+		teamId,
+		start: startDateTime ?? new Date(),
 	}
 
 	const select = {
 		id: true,
 	}
 	if (id) {
-		const existingMember = await prisma.member.findFirst({
+		const existingMatch = await prisma.match.findFirst({
 			where: { id },
 			select: { id: true },
 		})
-		if (!existingMember) {
+		if (!existingMatch) {
 			return json(
 				{
 					status: 'error',
@@ -68,77 +68,62 @@ export async function action({ request, params }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		member = await prisma.member.update({
+		await prisma.match.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		member = await prisma.member.create({ data, select })
+		await prisma.match.create({ data, select })
 	}
-	return redirectWithToast(`/clubs/${clubId}/members`, {
-		title: id ? 'Member updated' : 'Member created',
+	return redirectWithToast(`/clubs/${clubId}/matches`, {
+		title: id ? 'Match updated' : 'Match created',
 	})
 }
 
-export function MemberEditor({
+export function MatchEditor({
 	clubId,
-	member,
+	match,
+	teams,
 }: {
 	clubId: string
-	member?: { id: string; name: string; email: string; mobile: string }
+	match?: Match
+	teams: Team[]
 }) {
 	const navigate = useNavigate()
-	const memberEditorFetcher = useFetcher<typeof action>()
+	const matchEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
-		id: 'member-editor',
-		constraint: getFieldsetConstraint(MemberEditorSchema),
-		lastSubmission: memberEditorFetcher.data?.submission,
+		id: 'match-editor',
+		constraint: getFieldsetConstraint(MatchEditorSchema),
+		lastSubmission: matchEditorFetcher.data?.submission,
 		onValidate({ formData }) {
-			return parse(formData, { schema: MemberEditorSchema })
+			console.log('validate', parse(formData, { schema: MatchEditorSchema }))
+			return parse(formData, { schema: MatchEditorSchema })
 		},
-		defaultValue: {
-			name: member?.name,
-			email: member?.email,
-			mobile: member?.mobile,
-		},
+		defaultValue: {},
 		shouldRevalidate: 'onBlur',
 	})
 
 	return (
-		<>
-			{/* <Dialog> */}
-			{/* <DialogHeader>Add/Edit member</DialogHeader> */}
-			<memberEditorFetcher.Form
+		<Dialog>
+			<DialogHeader>{match?.id ? 'Edit match' : 'Add match'}</DialogHeader>
+
+			<matchEditorFetcher.Form
 				method="post"
-				action="/resources/member-editor"
+				action="/resources/match-editor"
 				{...form.props}
 			>
 				<input name="clubId" type="hidden" value={clubId} />
-				<input name="id" type="hidden" value={member?.id} />
+				<input name="id" type="hidden" value={match?.id} />
+
 				<Field
-					labelProps={{ children: 'Name' }}
+					labelProps={{ children: 'Match date' }}
 					inputProps={{
-						...conform.input(fields.name),
-						autoFocus: true,
+						type: 'date',
+						...conform.input(fields.startDateTime),
+						defaultValue: formatDate(fields.startDateTime),
 					}}
-					errors={fields.name.errors}
-					className="flex flex-col gap-y-2"
-				/>
-				<Field
-					labelProps={{ children: 'Email' }}
-					inputProps={{
-						...conform.input(fields.email),
-					}}
-					errors={fields.name.errors}
-					className="flex flex-col gap-y-2"
-				/>
-				<Field
-					labelProps={{ children: 'Mobile' }}
-					inputProps={{
-						...conform.input(fields.mobile),
-					}}
-					errors={fields.name.errors}
+					errors={fields.startDateTime.errors}
 					className="flex flex-col gap-y-2"
 				/>
 				<ErrorList errors={form.errors} id={form.errorId} />
@@ -148,12 +133,12 @@ export function MemberEditor({
 					</Button>
 					<StatusButton
 						status={
-							memberEditorFetcher.state === 'submitting'
+							matchEditorFetcher.state === 'submitting'
 								? 'pending'
-								: memberEditorFetcher.data?.status ?? 'idle'
+								: matchEditorFetcher.data?.status ?? 'idle'
 						}
 						type="submit"
-						disabled={memberEditorFetcher.state !== 'idle'}
+						disabled={matchEditorFetcher.state !== 'idle'}
 						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 					>
 						<Icon
@@ -163,8 +148,7 @@ export function MemberEditor({
 						<span className="max-md:hidden">Submit</span>
 					</StatusButton>
 				</FormActions>
-			</memberEditorFetcher.Form>
-			{/* </Dialog> */}
-		</>
+			</matchEditorFetcher.Form>
+		</Dialog>
 	)
 }

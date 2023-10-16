@@ -1,10 +1,10 @@
 import type { DataFunctionArgs, V2_MetaFunction } from '@remix-run/node'
-import { requireAnonymous, requireUserId } from '~/utils/auth.server.ts'
+import { requireAnonymous } from '~/utils/auth.server.ts'
 
 export const meta: V2_MetaFunction = () => [{ title: 'Remix Club' }]
 
 export async function loader({ request }: DataFunctionArgs) {
-	const userId = await requireAnonymous(request)
+	await requireAnonymous(request)
 	return null
 }
 

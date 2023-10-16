@@ -1,8 +1,8 @@
 import { Link } from '@remix-run/react'
-import { ComponentProps } from 'react'
+import type { ComponentProps } from 'react'
 import { buttonVariants } from './ui/button.js'
 import { cn } from '~/utils/misc.ts'
-import { VariantProps } from 'class-variance-authority'
+import type { VariantProps } from 'class-variance-authority'
 
 export interface ButtonLinkProps
 	extends ComponentProps<typeof Link>,
@@ -11,11 +11,13 @@ export interface ButtonLinkProps
 }
 
 export const ButtonLink = (props: ButtonLinkProps) => {
-	const { variant, size, className } = props
+	const { variant, size, className, children, ...rest } = props
 	return (
 		<Link
 			className={cn(buttonVariants({ variant, size, className }))}
-			{...props}
-		/>
+			{...rest}
+		>
+			{children}
+		</Link>
 	)
 }

@@ -1,26 +1,16 @@
-import { conform, useFieldList, useForm } from '@conform-to/react'
+import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useFetcher, useNavigate } from '@remix-run/react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
-import { Icon } from '~/components/ui/icon.tsx'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { FormActions } from '~/components/FormActions.tsx'
 import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '~/components/ui/select.tsx'
-import { FormGroup } from '~/components/FormGroup.tsx'
-import { Member, Season, Team } from '@prisma/client'
+import type { Member, Season, Team } from '@prisma/client'
 import { MultiCheckbox } from '~/components/mutli-checkbox.tsx'
 import { SelectField } from '~/components/SelectField.tsx'
 import { SubmitButton } from '~/components/SubmitButton.tsx'
@@ -46,8 +36,8 @@ export const TeamEditorSchema = z.object({
 	name: z.string().min(1),
 })
 
-export async function action({ request, params }: DataFunctionArgs) {
-	const userId = await requireUserId(request)
+export async function action({ request }: DataFunctionArgs) {
+	await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
 		schema: TeamEditorSchema,
@@ -64,7 +54,6 @@ export async function action({ request, params }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	let team
 
 	const { name, id, clubId, seasonId, teamType, members } = submission.value
 	const data = {
@@ -110,13 +99,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 			...data.members,
 			disconnect: existingTeam.members,
 		} as any
-		team = await prisma.team.update({
+		await prisma.team.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		team = await prisma.team.create({ data, select })
+		await prisma.team.create({ data, select })
 	}
 	return redirectWithToast(`/clubs/${clubId}/teams`, {
 		title: id ? 'Team updated' : 'Team created',
@@ -150,7 +139,6 @@ export function TeamEditor({
 		shouldRevalidate: 'onBlur',
 	})
 
-	const list = useFieldList(form.ref, fields.members)
 	return (
 		<>
 			<Dialog>
@@ -189,7 +177,7 @@ export function TeamEditor({
 						label="Players"
 						items={members.map(m => ({
 							id: m.id,
-							label: m.name,
+							label: m.firstName + ' ' + m.lastName,
 							value: m.id,
 						}))}
 					/>

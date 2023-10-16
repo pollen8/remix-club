@@ -16,25 +16,25 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { parse } from '@conform-to/zod'
 import { DeleteButton } from '~/components/ui/deleteButton.tsx'
-import { Table, Td, Th } from '~/components/Table.tsx'
-import { ButtonLink } from '~/components/ButtonLink.tsx'
 import { TableTitle } from '~/components/TableTitle.tsx'
+import { ButtonLink } from '~/components/ButtonLink.tsx'
+import { Th, Table, Td } from '~/components/Table.tsx'
 import { ButtonGroup } from '~/components/ButtonGroup.tsx'
 
 export async function loader({ request, params }: DataFunctionArgs) {
-	const timings = makeTimings('club members loader')
+	const timings = makeTimings('club matches loader')
 
-	const teams = await time(
+	const matches = await time(
 		() =>
-			prisma.team.findMany({
+			prisma.match.findMany({
 				where: {
 					clubId: params.id,
 				},
 			}),
-		{ timings, type: 'find club teams' },
+		{ timings, type: 'find club matches' },
 	)
 	return json(
-		{ teams, clubId: params.id },
+		{ matches, clubId: params.id },
 		{ headers: { 'Server-Timing': timings.toString() } },
 	)
 }
@@ -45,43 +45,41 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 	}
 }
 
-export default function ClubsTeamsIndexRoute() {
+export default function ClubsMatchesIndexRoute() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<>
+		<div>
 			<TableTitle>
-				<h2 className="text-h2">Teams</h2>
+				<h2 className="text-h2">Matches</h2>
 				<ButtonLink to="new">
-					<Icon name="plus">New Team</Icon>
+					<Icon name="plus">New Match</Icon>
 				</ButtonLink>
 			</TableTitle>
 			<Table>
 				<thead>
 					<tr>
-						<Th>Name</Th>
-						<Th>Type</Th>
-						<Th></Th>
+						<Th>Team</Th>
+						<Th>Opponent</Th>
+						<Th />
 					</tr>
 				</thead>
 				<tbody>
-					{/** @TODO  empty data cta */}
-					{data.teams.map(team => (
-						<tr key={team.id}>
-							<Td>{team.name}</Td>
-							<Td>{team.teamType}</Td>
-							<Td className="w-20">
+					{data.matches.map(match => (
+						<tr key={match.id}>
+							<Td>{match.teamId}</Td>
+							<Td>{match.oppositionTeamId}</Td>
+							<Td className="w-1">
 								<ButtonGroup>
-									<ButtonLink size="sm" variant="ghost" to={`${team.id}/edit`}>
+									<ButtonLink size="sm" variant="ghost" to={`${match.id}/edit`}>
 										<Icon name="pencil-1" />
 									</ButtonLink>
-									{/*** @TODO replace with modal confirmation */}
 									<DeleteButton
-										id={team.id}
-										size="sm"
-										clubId={data.clubId ?? ''}
-										action={action}
 										schema={DeleteFormSchema}
-										intent="delete-team"
+										intent="delete-match"
+										size="sm"
+										action={action}
+										id={match.id}
+										clubId={data.clubId ?? ''}
 									/>
 								</ButtonGroup>
 							</Td>
@@ -90,12 +88,12 @@ export default function ClubsTeamsIndexRoute() {
 				</tbody>
 			</Table>
 			<Outlet />
-		</>
+		</div>
 	)
 }
 
 const DeleteFormSchema = z.object({
-	intent: z.literal('delete-team'),
+	intent: z.literal('delete-match'),
 	id: z.string(),
 	clubId: z.string(),
 })
@@ -119,26 +117,26 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 	const { clubId, id } = submission.value
 
-	const team = await prisma.team.findFirst({
+	const match = await prisma.match.findFirst({
 		select: { id: true },
 		where: {
 			id: id,
 		},
 	})
 
-	if (!team) {
-		submission.error.id = ['Team not found']
+	if (!match) {
+		submission.error.id = ['Match not found']
 		return json({ status: 'error', submission } as const, {
 			status: 404,
 		})
 	}
 
-	await prisma.team.delete({
-		where: { id: team.id },
+	await prisma.match.delete({
+		where: { id: match.id },
 	})
 
-	return redirectWithToast(`/clubs/${clubId}/teams`, {
-		title: 'Team removed',
+	return redirectWithToast(`/clubs/${clubId}/matches`, {
+		title: 'Match removed',
 		variant: 'destructive',
 	})
 }

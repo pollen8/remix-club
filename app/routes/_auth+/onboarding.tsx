@@ -27,10 +27,7 @@ import {
 	usernameSchema,
 } from '~/utils/user-validation.ts'
 import { checkboxSchema } from '~/utils/zod-extensions.ts'
-import {
-	redirectWithFlash,
-	redirectWithToast,
-} from '~/utils/flash-session.server.ts'
+import { redirectWithFlash } from '~/utils/flash-session.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'

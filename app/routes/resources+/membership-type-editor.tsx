@@ -10,21 +10,23 @@ import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
+import { Dialog, DialogHeader } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
+import type { ClubMembershipTypes } from '@prisma/client'
+import { formatDate } from '~/utils/date.ts'
 
-export const MemberEditorSchema = z.object({
+export const MembershipTypeEditorSchema = z.object({
 	id: z.string().optional(),
 	clubId: z.string(),
-	name: z.string().min(1),
-	email: z.string().email(),
-	mobile: z.string().optional(),
+	title: z.string().min(1),
+	cost: z.number(),
 })
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request }: DataFunctionArgs) {
 	await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
-		schema: MemberEditorSchema,
+		schema: MembershipTypeEditorSchema,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -38,28 +40,24 @@ export async function action({ request, params }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	const { name, email, mobile, id, clubId } = submission.value
+
+	const { title, cost, id, clubId } = submission.value
 
 	const data = {
-		name,
-		email: email,
-		mobile: mobile ?? '',
-		clubs: {
-			connect: {
-				id: clubId,
-			},
-		},
+		title,
+		cost,
+		clubId: clubId,
 	}
 
 	const select = {
 		id: true,
 	}
 	if (id) {
-		const existingMember = await prisma.member.findFirst({
+		const existingMembership = await prisma.clubMembershipTypes.findFirst({
 			where: { id },
 			select: { id: true },
 		})
-		if (!existingMember) {
+		if (!existingMembership) {
 			return json(
 				{
 					status: 'error',
@@ -68,79 +66,76 @@ export async function action({ request, params }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		member = await prisma.member.update({
+		await prisma.clubMembershipTypes.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		member = await prisma.member.create({ data, select })
+		await prisma.clubMembershipTypes.create({ data, select })
 	}
-	return redirectWithToast(`/clubs/${clubId}/members`, {
-		title: id ? 'Member updated' : 'Member created',
+	return redirectWithToast(`/clubs/${clubId}/membershipTypes`, {
+		title: id ? 'Membership type updated' : 'Membership type created',
 	})
 }
 
-export function MemberEditor({
+export function MembershipTypeEditor({
 	clubId,
-	member,
+	membershipType,
 }: {
 	clubId: string
-	member?: { id: string; name: string; email: string; mobile: string }
+	membershipType?: ClubMembershipTypes
 }) {
 	const navigate = useNavigate()
-	const memberEditorFetcher = useFetcher<typeof action>()
+	const membershipTypeEditorFetcher = useFetcher<typeof action>()
 	const [form, fields] = useForm({
-		id: 'member-editor',
-		constraint: getFieldsetConstraint(MemberEditorSchema),
-		lastSubmission: memberEditorFetcher.data?.submission,
+		id: 'season-editor',
+		constraint: getFieldsetConstraint(MembershipTypeEditorSchema),
+		lastSubmission: membershipTypeEditorFetcher.data?.submission,
 		onValidate({ formData }) {
-			return parse(formData, { schema: MemberEditorSchema })
+			console.log(
+				'validate',
+				parse(formData, { schema: MembershipTypeEditorSchema }),
+			)
+			return parse(formData, { schema: MembershipTypeEditorSchema })
 		},
-		defaultValue: {
-			name: member?.name,
-			email: member?.email,
-			mobile: member?.mobile,
-		},
+		defaultValue: membershipType,
 		shouldRevalidate: 'onBlur',
 	})
 
 	return (
-		<>
-			{/* <Dialog> */}
-			{/* <DialogHeader>Add/Edit member</DialogHeader> */}
-			<memberEditorFetcher.Form
+		<Dialog>
+			<DialogHeader>
+				{membershipType?.id ? 'Edit membership type' : 'Add membership type'}
+			</DialogHeader>
+
+			<membershipTypeEditorFetcher.Form
 				method="post"
-				action="/resources/member-editor"
+				action="/resources/membership-type-editor"
 				{...form.props}
 			>
 				<input name="clubId" type="hidden" value={clubId} />
-				<input name="id" type="hidden" value={member?.id} />
+				<input name="id" type="hidden" value={membershipType?.id} />
 				<Field
 					labelProps={{ children: 'Name' }}
 					inputProps={{
-						...conform.input(fields.name),
+						...conform.input(fields.title),
 						autoFocus: true,
 					}}
-					errors={fields.name.errors}
+					errors={fields.title.errors}
 					className="flex flex-col gap-y-2"
 				/>
 				<Field
-					labelProps={{ children: 'Email' }}
+					labelProps={{ children: 'Cost' }}
 					inputProps={{
-						...conform.input(fields.email),
+						type: 'number',
+						...conform.input(fields.cost),
+						defaultValue: formatDate(fields.cost),
 					}}
-					errors={fields.name.errors}
+					errors={fields.cost.errors}
 					className="flex flex-col gap-y-2"
 				/>
-				<Field
-					labelProps={{ children: 'Mobile' }}
-					inputProps={{
-						...conform.input(fields.mobile),
-					}}
-					errors={fields.name.errors}
-					className="flex flex-col gap-y-2"
-				/>
+
 				<ErrorList errors={form.errors} id={form.errorId} />
 				<FormActions>
 					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
@@ -148,12 +143,12 @@ export function MemberEditor({
 					</Button>
 					<StatusButton
 						status={
-							memberEditorFetcher.state === 'submitting'
+							membershipTypeEditorFetcher.state === 'submitting'
 								? 'pending'
-								: memberEditorFetcher.data?.status ?? 'idle'
+								: membershipTypeEditorFetcher.data?.status ?? 'idle'
 						}
 						type="submit"
-						disabled={memberEditorFetcher.state !== 'idle'}
+						disabled={membershipTypeEditorFetcher.state !== 'idle'}
 						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 					>
 						<Icon
@@ -163,8 +158,7 @@ export function MemberEditor({
 						<span className="max-md:hidden">Submit</span>
 					</StatusButton>
 				</FormActions>
-			</memberEditorFetcher.Form>
-			{/* </Dialog> */}
-		</>
+			</membershipTypeEditorFetcher.Form>
+		</Dialog>
 	)
 }

@@ -6,26 +6,23 @@ import { z } from 'zod'
 import { Button } from '~/components/ui/button.tsx'
 import { requireUserId } from '~/utils/auth.server.ts'
 import { prisma } from '~/utils/db.server.ts'
-import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
+import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { Dialog } from '~/components/Dialog.tsx'
 import { FormActions } from '~/components/FormActions.tsx'
 import { SubmitButton } from '~/components/SubmitButton.tsx'
-import type { Club, Sport } from '@prisma/client'
-import { SelectField } from '~/components/SelectField.tsx'
+import type { Sport } from '@prisma/client'
 
-export const ClubEditorSchema = z.object({
+export const SportsEditorSchema = z.object({
 	id: z.string().optional(),
 	name: z.string().min(1),
-	description: z.string().optional(),
-	sportId: z.string(),
 })
 
 export async function action({ request }: DataFunctionArgs) {
-	const userId = await requireUserId(request)
+	await requireUserId(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
-		schema: ClubEditorSchema,
+		schema: SportsEditorSchema,
 	})
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const)
@@ -39,24 +36,19 @@ export async function action({ request }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	const { name, description, id, sportId } = submission.value
+	const { id } = submission.value
 
-	const data = {
-		createdById: userId,
-		name,
-		description: description ?? '',
-		sportId,
-	}
+	const data = { ...submission.value }
 
 	const select = {
 		id: true,
 	}
 	if (id) {
-		const existingClub = await prisma.club.findFirst({
-			where: { id, createdById: userId },
+		const existingSport = await prisma.sport.findFirst({
+			where: { id },
 			select: { id: true },
 		})
-		if (!existingClub) {
+		if (!existingSport) {
 			return json(
 				{
 					status: 'error',
@@ -65,47 +57,44 @@ export async function action({ request }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		await prisma.club.update({
+		await prisma.sport.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		await prisma.club.create({ data, select })
+		await prisma.sport.create({ data, select })
 	}
-	return redirectWithToast(`/clubs`, {
-		title: id ? 'Club updated' : 'Club created',
+	return redirectWithToast(`/sports`, {
+		title: id ? 'Sport updated' : 'Sport created',
 	})
 }
 
-export function ClubEditor({ club, sports }: { sports: Sport[]; club?: Club }) {
+export function SportEditor({ sport }: { sport?: Sport }) {
 	const navigate = useNavigate()
-	const clubEditorFetcher = useFetcher<typeof action>()
+	const SportEditorFetcher = useFetcher<typeof action>()
 
 	const [form, fields] = useForm({
-		id: 'club-editor',
-		constraint: getFieldsetConstraint(ClubEditorSchema),
-		lastSubmission: clubEditorFetcher.data?.submission,
+		id: 'sport-editor',
+		constraint: getFieldsetConstraint(SportsEditorSchema),
+		lastSubmission: SportEditorFetcher.data?.submission,
 		onValidate({ formData }) {
-			return parse(formData, { schema: ClubEditorSchema })
+			return parse(formData, { schema: SportsEditorSchema })
 		},
-		defaultValue: {
-			name: club?.name,
-			description: club?.description,
-		},
+		defaultValue: sport,
 		shouldRevalidate: 'onBlur',
 	})
 
 	return (
 		<Dialog>
-			<clubEditorFetcher.Form
+			<SportEditorFetcher.Form
 				method="post"
-				action="/resources/club-editor"
+				action="/resources/sports-editor"
 				className="flex h-full flex-col gap-y-4 overflow-x-hidden px-10 pb-28 pt-12"
 				{...form.props}
 			>
-				<input name="id" type="hidden" value={club?.id} />
-				Edit club....
+				<input name="id" type="hidden" value={sport?.id} />
+				Edit sport....
 				<Field
 					labelProps={{ children: 'Name' }}
 					inputProps={{
@@ -113,30 +102,16 @@ export function ClubEditor({ club, sports }: { sports: Sport[]; club?: Club }) {
 						autoFocus: true,
 					}}
 					errors={fields.name.errors}
-					className="flex flex-col gap-y-2"
-				/>
-				<TextareaField
-					labelProps={{ children: 'Description' }}
-					textareaProps={{
-						...conform.textarea(fields.description),
-						className: 'flex-1 resize-none',
-					}}
-					errors={fields.description.errors}
-					className="flex flex-1 flex-col gap-y-2"
-				/>
-				<SelectField
-					options={sports.map(sport => ({ id: sport.id, name: sport.name }))}
-					placeHolder="Sport"
-					field={fields.sportId}
+					className="border-grey-100 flex flex-col gap-y-2"
 				/>
 				<ErrorList errors={form.errors} id={form.errorId} />
 				<FormActions>
 					<Button variant="outline" type="button" onClick={() => navigate(-1)}>
 						Cancel
 					</Button>
-					<SubmitButton fetcher={clubEditorFetcher} />
+					<SubmitButton fetcher={SportEditorFetcher} />
 				</FormActions>
-			</clubEditorFetcher.Form>
+			</SportEditorFetcher.Form>
 		</Dialog>
 	)
 }

@@ -1,4 +1,5 @@
-import { FieldConfig, conform } from '@conform-to/react'
+import type { FieldConfig } from '@conform-to/react'
+import { conform } from '@conform-to/react'
 
 type Props = {
 	items: { value: string; label: string; id: string }[]

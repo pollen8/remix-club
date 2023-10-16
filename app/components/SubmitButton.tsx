@@ -1,4 +1,4 @@
-import { FetcherWithComponents } from '@remix-run/react'
+import { type FetcherWithComponents } from '@remix-run/react'
 import { Icon } from './ui/icon.tsx'
 import { StatusButton } from './ui/status-button.tsx'
 
