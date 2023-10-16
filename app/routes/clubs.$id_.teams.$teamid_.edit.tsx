@@ -31,7 +31,8 @@ export async function loader({ request, params }: DataFunctionArgs) {
 					members: {
 						select: {
 							id: true,
-							name: true,
+							firstName: true,
+							lastName: true,
 						},
 					},
 				},

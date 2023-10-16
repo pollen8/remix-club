@@ -137,7 +137,7 @@ export async function action({ request }: DataFunctionArgs) {
 			break
 		}
 		default: {
-			submission.error = { '': 'Invalid intent' }
+			submission.error = { '': ['Invalid intent'] }
 			return json({ status: 'error', submission } as const)
 		}
 	}

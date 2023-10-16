@@ -100,7 +100,7 @@ export async function action({ request }: DataFunctionArgs) {
 	if (response.status === 'success') {
 		return redirect(redirectTo.pathname + redirectTo.search)
 	} else {
-		submission.error[''] = response.error.message
+		submission.error[''] = [response.error.message]
 		return json(
 			{
 				status: 'error',

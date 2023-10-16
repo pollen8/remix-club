@@ -1,4 +1,4 @@
-import type { DataFunctionArgs, type HeadersFunction } from '@remix-run/node'
+import type { DataFunctionArgs, HeadersFunction } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
 import { Link, NavLink, useLoaderData } from '@remix-run/react'
 import { Icon } from '~/components/ui/icon.tsx'

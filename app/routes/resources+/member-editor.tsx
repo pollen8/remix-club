@@ -15,7 +15,8 @@ import { FormActions } from '~/components/FormActions.tsx'
 export const MemberEditorSchema = z.object({
 	id: z.string().optional(),
 	clubId: z.string(),
-	name: z.string().min(1),
+	firstName: z.string().min(1),
+	lastName: z.string().min(1),
 	email: z.string().email(),
 	mobile: z.string().optional(),
 })
@@ -38,13 +39,20 @@ export async function action({ request, params }: DataFunctionArgs) {
 			{ status: 400 },
 		)
 	}
-	const { name, email, mobile, id, clubId } = submission.value
+	const { firstName, lastName, email, mobile, id, clubId } = submission.value
 
 	const data = {
-		name,
+		firstName,
+		lastName,
 		email: email,
+		// TODO fields for these
+		gender: '',
+		address: '',
+		emergencyContactName: '',
+		affiliationNumber: '',
+		// end todo
 		mobile: mobile ?? '',
-		clubs: {
+		club: {
 			connect: {
 				id: clubId,
 			},
@@ -68,13 +76,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		member = await prisma.member.update({
+		await prisma.member.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		member = await prisma.member.create({ data, select })
+		await prisma.member.create({ data, select })
 	}
 	return redirectWithToast(`/clubs/${clubId}/members`, {
 		title: id ? 'Member updated' : 'Member created',
@@ -117,12 +125,21 @@ export function MemberEditor({
 				<input name="clubId" type="hidden" value={clubId} />
 				<input name="id" type="hidden" value={member?.id} />
 				<Field
-					labelProps={{ children: 'Name' }}
+					labelProps={{ children: 'First name' }}
 					inputProps={{
-						...conform.input(fields.name),
+						...conform.input(fields.firstName),
 						autoFocus: true,
 					}}
-					errors={fields.name.errors}
+					errors={fields.firstName.errors}
+					className="flex flex-col gap-y-2"
+				/>
+				<Field
+					labelProps={{ children: 'Last name' }}
+					inputProps={{
+						...conform.input(fields.lastName),
+						autoFocus: true,
+					}}
+					errors={fields.lastName.errors}
 					className="flex flex-col gap-y-2"
 				/>
 				<Field
@@ -130,7 +147,7 @@ export function MemberEditor({
 					inputProps={{
 						...conform.input(fields.email),
 					}}
-					errors={fields.name.errors}
+					errors={fields.email.errors}
 					className="flex flex-col gap-y-2"
 				/>
 				<Field
@@ -138,7 +155,7 @@ export function MemberEditor({
 					inputProps={{
 						...conform.input(fields.mobile),
 					}}
-					errors={fields.name.errors}
+					errors={fields.mobile.errors}
 					className="flex flex-col gap-y-2"
 				/>
 				<ErrorList errors={form.errors} id={form.errorId} />

@@ -112,7 +112,7 @@ export function InlineLogin({
 		id: 'inline-login',
 		defaultValue: { redirectTo },
 		constraint: getFieldsetConstraint(loginFormSchema),
-		lastSubmission: loginFetcher.data?.submission,
+		lastSubmission: loginFetcher.data?.submission as any,
 		onValidate({ formData }) {
 			return parse(formData, { schema: loginFormSchema })
 		},

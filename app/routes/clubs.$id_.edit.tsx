@@ -23,7 +23,14 @@ export default function ClubEdit() {
 
 	return (
 		<div className="absolute inset-0">
-			<ClubEditor club={data.club} />
+			<ClubEditor
+				club={{
+					...data.club,
+					createdAt: new Date(data.club.createdAt),
+					updatedAt: new Date(data.club.updatedAt),
+				}}
+				sports={[]}
+			/>
 		</div>
 	)
 }

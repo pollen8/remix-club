@@ -7,7 +7,6 @@ import {
 import { Link, useLoaderData } from '@remix-run/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
-import { SearchBar } from '~/components/search-bar.tsx'
 import { prisma } from '~/utils/db.server.ts'
 import { getUserImgSrc } from '~/utils/misc.ts'
 import {
@@ -89,9 +88,7 @@ export default function UsersRoute() {
 	return (
 		<div>
 			<h1 className="text-h1">Epic Notes Users</h1>
-			<div className="w-full max-w-[700px] ">
-				<SearchBar status={data.status} autoFocus autoSubmit />
-			</div>
+			<div className="w-full max-w-[700px] "></div>
 			{data.status === 'idle' ? (
 				<ul className="flex w-full flex-wrap items-center justify-center gap-4">
 					{data.users.map(user => (
